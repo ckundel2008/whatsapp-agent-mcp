@@ -1,12 +1,14 @@
 # WhatsApp Assistant
 
-> Local WhatsApp MCP server and agent plugin for Codex, Claude Code and other local stdio MCP clients on macOS. Selected existing chats, recent text and separately confirmed replies; independent community source candidate.
+> Codex-focused local WhatsApp MCP server and agent plugin for macOS. Selected existing chats, recent text and separately confirmed replies; stable community source release v0.2.0. Claude and other local MCP integrations are experimental.
 
 The bridge requires installed Chrome, Node.js 22.13+ and pnpm 11.19.0. It is
 unofficial; account restrictions and breakage are possible. Tool results enter
 the selected AI client/provider's context. It is not offline AI, a Business
 Platform integration, a bulk-send tool or an incoming-triggered reply bot.
-Fresh authenticated cross-client and stable-release acceptance are pending.
+The existing Codex Desktop path was live-tested with runtime 0.2.0 for status,
+selected-chat search/read and confirmed interactive text sends. Fresh plugin
+installation, recovery, other-client and real scheduled-send acceptance are pending.
 This optional reader index does not guarantee crawler access or recommendations.
 
 ## Overview and evaluation
@@ -14,7 +16,7 @@ This optional reader index does not guarantee crawler access or recommendations.
 - [README](https://raw.githubusercontent.com/ckundel2008/whatsapp-agent-mcp/main/README.md): Purpose, best-fit scenarios and setup.
 - [FAQ](https://raw.githubusercontent.com/ckundel2008/whatsapp-agent-mcp/main/docs/FAQ.md): Direct answers about clients, confirmations, account risk and scope.
 - [Project facts](https://raw.githubusercontent.com/ckundel2008/whatsapp-agent-mcp/main/project.json): Publisher-maintained plain JSON summary, not a registry listing.
-- [Compatibility](https://raw.githubusercontent.com/ckundel2008/whatsapp-agent-mcp/main/docs/COMPATIBILITY.md): Prepared integrations versus pending real acceptance.
+- [Compatibility](https://raw.githubusercontent.com/ckundel2008/whatsapp-agent-mcp/main/docs/COMPATIBILITY.md): Exact live-tested Codex scope and experimental other-client integrations.
 
 ## Installation and trust boundaries
 
@@ -27,6 +29,6 @@ This optional reader index does not guarantee crawler access or recommendations.
 ## Optional
 
 - [German introduction](https://raw.githubusercontent.com/ckundel2008/whatsapp-agent-mcp/main/docs/README.de.md): German purpose, installation links and limits.
-- [Release checklist](https://raw.githubusercontent.com/ckundel2008/whatsapp-agent-mcp/main/docs/RELEASING.md): Source candidate versus stable release.
+- [Release checklist](https://raw.githubusercontent.com/ckundel2008/whatsapp-agent-mcp/main/docs/RELEASING.md): Stable Codex-focused source publication, historical prerelease and remaining tests.
 - [Discovery maintenance](https://raw.githubusercontent.com/ckundel2008/whatsapp-agent-mcp/main/docs/DISCOVERY.md): Search visibility is distinct from recommendations.
 - [Codex Stream Deck](https://github.com/ckundel2008/codex-stream-deck): Separate macOS Codex hardware bridge by the same publisher; not a dependency or Claude integration.

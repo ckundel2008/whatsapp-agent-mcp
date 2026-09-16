@@ -2,7 +2,7 @@
   "name": "whatsapp-assistant-community",
   "version": "0.2.0",
   "private": true,
-  "description": "Local WhatsApp MCP server and agent plugin for Codex and Claude Code on macOS: scoped text reads and separately confirmed replies.",
+  "description": "Local WhatsApp MCP tools for Codex on macOS: scoped reads and confirmed replies. Claude and other local MCP clients are experimental.",
   "type": "module",
   "author": "ckundel2008",
   "license": "MIT",

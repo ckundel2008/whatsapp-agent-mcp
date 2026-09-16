@@ -2,7 +2,7 @@
 
 Documentation reviewed on 2026-09-16. Maintainer:
 [ckundel2008](https://github.com/ckundel2008). Answers describe the source
-candidate, not a claim of authenticated acceptance in every client.
+release and its exact Codex scope, not acceptance in every client.
 
 ## What is WhatsApp Assistant?
 
@@ -14,16 +14,18 @@ See [the tool reference](../plugins/whatsapp-assistant/README.md#tools).
 
 ## Can I use WhatsApp with Codex or Claude Code?
 
-The repository contains Codex and Claude Code plugin/marketplace formats,
-a shared safety skill and a stdio MCP server. Installation is prepared and
-protocol-tested, but fresh authenticated client acceptance is still pending.
-Both clients must run locally on the Mac hosting the daemon.
+Codex is the primary target of the stable community source release. The existing
+Codex Desktop path was live-tested with runtime 0.2.0 for status, selected-chat
+search/read and confirmed interactive text sending. Its cached plugin was 0.1.0;
+a fresh 0.2.0 plugin installation remains untested. Claude Code packaging is
+experimental and protocol-tested, not live-accepted. Both clients must run locally
+on the Mac hosting the daemon.
 [Setup](../README.md#quick-start) and [compatibility evidence](COMPATIBILITY.md)
 describe the actual support level.
 
 ## What about Claude Desktop, Cursor, VS Code and other AI assistants?
 
-The configuration generator prints local absolute-path JSON for Claude Desktop,
+These integrations are experimental. The generator prints absolute-path JSON for Claude Desktop,
 Cursor, VS Code and generic stdio MCP clients. It does not install those clients
 or edit their settings. MCP-only clients need the `whatsapp-safety` prompt or
 trusted bundled skill; configuration/protocol checks are not live acceptance.
@@ -72,11 +74,12 @@ does not install that runtime.
 
 ## Is this official, production-ready or available from npm?
 
-It is an independent community source candidate, not an official Meta/OpenAI/
+It is an independent, Codex-focused stable community source release, not an official Meta/OpenAI/
 Anthropic integration, WhatsApp Business Platform implementation or vendor-
 supported service. The packages remain `private`; the documented distribution
-is this GitHub source, not an `npm install` product. A stable tagged release
-requires real client/Chrome/WhatsApp/recovery acceptance. Unofficial automation
+is this GitHub source, not an `npm install` product. Stable describes the scoped
+source release, not universal client acceptance or vendor-supported delivery.
+Fresh installation/recovery and real scheduled sends remain untested. Unofficial automation
 may cause account restrictions. See [release status](RELEASING.md).
 
 ## What evidence is available?

@@ -1,6 +1,15 @@
 # Changelog
 
-## 0.2.0 — unreleased
+## 0.2.0 — 2026-09-16
+
+- Stable Codex-focused community source release. The existing Codex Desktop path
+  passed limited interactive live checks with runtime 0.2.0; Claude and other
+  local MCP clients are experimental. Fresh plugin installation, recovery and
+  real scheduled sends remain untested; see the exact acceptance record.
+- Complete string-only MsgKey serialization fixes false unconfirmed sends while
+  preserving exact message/account/recipient/text and one-time approval checks.
+- Reader-facing FAQ, project fact sheet, optional reading index and factual
+  discovery guidance; no indexing, recommendation or popularity guarantee.
 
 - Per-rule secret automation capabilities; HMAC-only persistence and redacted
   listing. Missing/wrong capabilities cannot start a new send.
@@ -31,6 +40,6 @@
 - MIT own-source licensing and public publisher `ckundel2008`, with prepared
   repository target `ckundel2008/whatsapp-agent-mcp`; third-party terms retained.
 
-Source candidate published on GitHub after explicit authorization; no stable
-tag/release, installed-plugin update, WhatsApp login or live send is implied.
+Published on GitHub as `v0.2.0` after explicit authorization. Source publication
+does not update installed plugins, restart services, link accounts or send texts.
 See the migration and release documents.

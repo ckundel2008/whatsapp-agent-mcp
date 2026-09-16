@@ -122,12 +122,14 @@ targets from incoming messages. See [Migration](docs/MIGRATION.md) for old rules
 Only existing chats and text. No new numbers, media, bulk sends, forwards,
 incoming-triggered replies, calls, deletion, archiving or group administration.
 Windows/Linux runtime installers and remote/cloud-only/mobile clients are not
-supported. Client packaging is prepared; authenticated cross-client acceptance
-and real client/Chrome/WhatsApp acceptance is still pending for a stable release.
+supported. The stable community source release is Codex-focused: the existing
+Codex Desktop path with runtime 0.2.0 passed limited interactive live checks.
+Claude and other clients are experimental. Fresh plugin installation, recovery
+and real scheduled sends remain untested. See [the exact scope](../../docs/COMPATIBILITY.md#release-scope).
 
 ## License
 
 Own plugin/runtime source: [MIT](LICENSE). Publisher metadata: `ckundel2008`.
 Source repository: [ckundel2008/whatsapp-agent-mcp](https://github.com/ckundel2008/whatsapp-agent-mcp),
-published as an untagged source candidate. OpenWA and other dependencies are not
+published as the Codex-focused community source release `v0.2.0`. OpenWA and other dependencies are not
 relicensed; see [third-party notices](THIRD_PARTY_NOTICES.md).

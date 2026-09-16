@@ -21,9 +21,12 @@ OpenWA ist inoffiziell; Ausfaelle und Kontoeinschraenkungen sind moeglich.
 [Datenschutz](../plugins/whatsapp-assistant/docs/PRIVACY.md) ·
 [Veroeffentlichung und offene Schritte](RELEASING.md)
 
-Version 0.2.0 ist auf [GitHub](https://github.com/ckundel2008/whatsapp-agent-mcp)
-als Quellkandidat verfuegbar, nicht als stabiler Tag oder im authentifizierten
-Betrieb aller Clients abgenommen. Alte Automationsregeln
+Version 0.2.0 ist ein stabiler, Codex-fokussierter Community-Quellrelease auf
+[GitHub](https://github.com/ckundel2008/whatsapp-agent-mcp). Der bestehende Codex-
+Desktop-Pfad wurde mit Laufzeit 0.2.0 fuer Status, Chatsuche, Lesen und separat
+bestaetigten Textversand getestet. Claude Code/Desktop, Cursor, VS Code und andere
+MCP-Clients sind experimentell. Eine frische Plugininstallation, Recovery und
+echter geplanter Versand sind nicht abgenommen. Alte Automationsregeln
 muessen fuer die neue Capability ausdruecklich widerrufen und neu autorisiert
 werden. Die vorhandene installierte Version wird dadurch nicht automatisch geaendert.
 
