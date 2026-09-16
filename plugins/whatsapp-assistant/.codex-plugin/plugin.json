@@ -1,0 +1,33 @@
+{
+  "name": "whatsapp-assistant",
+  "version": "0.2.0",
+  "description": "Local WhatsApp tools: scoped reading, separately confirmed replies, and constrained scheduled sends.",
+  "author": {
+    "name": "ckundel2008",
+    "url": "https://github.com/ckundel2008"
+  },
+  "homepage": "https://github.com/ckundel2008/whatsapp-agent-mcp",
+  "repository": "https://github.com/ckundel2008/whatsapp-agent-mcp",
+  "license": "MIT",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "WhatsApp Assistant",
+    "shortDescription": "Local WhatsApp tools with confirmed replies.",
+    "longDescription": "Read selected existing chats through a local OpenWA daemon. Interactive replies require separate confirmation; scheduled sends require a secret, narrowly scoped prior authorization.",
+    "developerName": "ckundel2008",
+    "websiteURL": "https://github.com/ckundel2008/whatsapp-agent-mcp",
+    "privacyPolicyURL": "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/plugins/whatsapp-assistant/docs/PRIVACY.md",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Local"
+    ],
+    "defaultPrompt": [
+      "Show my unread WhatsApp chats.",
+      "Summarize recent messages in the selected chat.",
+      "Draft a reply and wait for my confirmation."
+    ]
+  }
+}

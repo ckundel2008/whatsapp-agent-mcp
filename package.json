@@ -1,0 +1,18 @@
+{
+  "name": "whatsapp-assistant-community",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "author": "ckundel2008",
+  "license": "MIT",
+  "homepage": "https://github.com/ckundel2008/whatsapp-agent-mcp",
+  "repository": { "type": "git", "url": "https://github.com/ckundel2008/whatsapp-agent-mcp.git" },
+  "engines": { "node": ">=22.12" },
+  "scripts": {
+    "test": "node --test plugins/whatsapp-assistant/tests/*.test.mjs",
+    "check": "node scripts/check-release.mjs",
+    "release:check": "node scripts/check-release.mjs --publish",
+    "release:package": "node scripts/package-candidate.mjs",
+    "release:verify": "node scripts/verify-candidate.mjs"
+  }
+}

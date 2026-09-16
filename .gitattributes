@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.sh text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+.release-local/** export-ignore
+.github/** export-ignore

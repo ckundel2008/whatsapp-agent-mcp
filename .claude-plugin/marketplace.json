@@ -1,0 +1,11 @@
+{
+  "name": "whatsapp-assistant-community",
+  "owner": { "name": "ckundel2008" },
+  "plugins": [
+    {
+      "name": "whatsapp-assistant",
+      "source": "./plugins/whatsapp-assistant",
+      "description": "Local WhatsApp tools with scoped reads and separately confirmed text replies."
+    }
+  ]
+}

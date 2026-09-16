@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "whatsapp-assistant",
+  "version": "0.2.0",
+  "description": "Local WhatsApp tools for AI agents: scoped reading, separately confirmed replies, and constrained scheduled sends.",
+  "author": { "name": "ckundel2008", "url": "https://github.com/ckundel2008" },
+  "homepage": "https://github.com/ckundel2008/whatsapp-agent-mcp",
+  "repository": "https://github.com/ckundel2008/whatsapp-agent-mcp",
+  "license": "MIT",
+  "keywords": ["whatsapp", "mcp", "codex", "claude-code", "agent-skills", "local-first", "privacy"]
+}

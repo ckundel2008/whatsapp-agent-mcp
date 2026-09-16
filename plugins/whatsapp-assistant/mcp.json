@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "whatsapp-assistant": {
+      "type": "stdio",
+      "command": "./scripts/run-mcp.sh",
+      "cwd": "./"
+    }
+  }
+}

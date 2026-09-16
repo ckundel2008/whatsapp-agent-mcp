@@ -1,0 +1,10 @@
+{
+  "name": "whatsapp-assistant",
+  "version": "0.2.0",
+  "description": "Local WhatsApp tools: scoped reading, separately confirmed replies, and constrained scheduled sends.",
+  "author": { "name": "ckundel2008", "url": "https://github.com/ckundel2008" },
+  "homepage": "https://github.com/ckundel2008/whatsapp-agent-mcp",
+  "repository": "https://github.com/ckundel2008/whatsapp-agent-mcp",
+  "license": "MIT",
+  "keywords": ["whatsapp", "mcp", "privacy", "local-first"]
+}

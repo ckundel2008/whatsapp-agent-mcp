@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "whatsapp-assistant": {
+      "command": "/bin/sh",
+      "args": ["-c", "if [ -n \"$PLUGIN_ROOT\" ]; then task_plugin_root=\"$PLUGIN_ROOT\"; elif [ -n \"$CLAUDE_PLUGIN_ROOT\" ]; then task_plugin_root=\"$CLAUDE_PLUGIN_ROOT\"; elif [ -n \"$CURSOR_PLUGIN_ROOT\" ]; then task_plugin_root=\"$CURSOR_PLUGIN_ROOT\"; else task_plugin_root=.; fi; exec /bin/sh \"$task_plugin_root/scripts/run-mcp.sh\""],
+      "type": "stdio"
+    }
+  }
+}
