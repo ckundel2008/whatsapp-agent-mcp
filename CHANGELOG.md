@@ -10,6 +10,10 @@
 - Metadata logs no longer include technical chat IDs. Browser metadata returns
   only the requested page and collects previews only when explicitly enabled.
 - Recoverable reauthentication with private backup and failed-setup rollback.
+- Correct XML/sed escaping for launchd paths containing ampersands, angle
+  brackets, delimiters or backslashes.
+- Consistent app-root/socket/secret selection in MCP and direct CLIs; installer
+  and reauthentication reject unsupported overrides before live effects.
 - Portable Agent Plugins, Codex and Claude Code packaging; local MCP config
   generator for Claude Desktop, Cursor, VS Code and generic clients.
 - Shared English safety skill with user-language responses, exposed as an MCP

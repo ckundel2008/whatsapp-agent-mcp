@@ -4,10 +4,19 @@ umask 077
 
 LABEL="de.local.codex-whatsapp-assistant"
 USER_ID=$(/usr/bin/id -u)
-APP_ROOT="${WHATSAPP_ASSISTANT_HOME:-$HOME/Library/Application Support/WhatsApp Assistant}"
+DEFAULT_APP_ROOT="$HOME/Library/Application Support/WhatsApp Assistant"
+APP_ROOT="$DEFAULT_APP_ROOT"
 SESSION_DIR="$APP_ROOT/session"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 NODE_BIN="$APP_ROOT/runtime/bin/node"
+
+if [ "${WHATSAPP_ASSISTANT_HOME:-$APP_ROOT}" != "$APP_ROOT" ] ||
+   [ "${WHATSAPP_ASSISTANT_SOCKET:-$APP_ROOT/openwa.sock}" != "$APP_ROOT/openwa.sock" ] ||
+   [ "${WHATSAPP_ASSISTANT_SECRET_FILE:-$APP_ROOT/socket.secret}" != "$APP_ROOT/socket.secret" ] ||
+   [ "${WHATSAPP_ASSISTANT_CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}" != "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then
+  echo "reauth.sh unterstuetzt nur die Standardpfade; abweichende WHATSAPP_ASSISTANT-Einstellungen geschlossen abgelehnt." >&2
+  exit 2
+fi
 
 if [ ! -x "$NODE_BIN" ] || [ ! -f "$APP_ROOT/runtime/daemon.mjs" ]; then
   echo "Runtime fehlt. Bitte zuerst install.sh ausfuehren." >&2

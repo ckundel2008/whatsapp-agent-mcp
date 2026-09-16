@@ -37,6 +37,23 @@ MCP-only configuration supplies tools and a safety prompt, not automatic plugin
 skill loading. Load `whatsapp-safety`, or attach the bundled SKILL.md as trusted
 workflow guidance. Do not disable confirmations to make an incompatible client work.
 
+## Default installation versus manual deployments
+
+The supported installer, launchd service and reauthentication script use the
+login user's default app root and installed Chrome. `install.sh` and `reauth.sh`
+reject divergent `WHATSAPP_ASSISTANT_HOME`, `WHATSAPP_ASSISTANT_SOCKET`,
+`WHATSAPP_ASSISTANT_SECRET_FILE` or `WHATSAPP_ASSISTANT_CHROME` settings before
+changing files, sessions or services; they do not provision alternate launchd
+installations. The default installer still requires a backup before an upgrade.
+
+For a separately provisioned manual daemon/MCP deployment, daemon, MCP and
+direct CLI default socket/secret paths consistently beneath
+`WHATSAPP_ASSISTANT_HOME`. Explicit `WHATSAPP_ASSISTANT_SOCKET` and
+`WHATSAPP_ASSISTANT_SECRET_FILE` values take precedence. Configure both sides
+identically and protect that app root; overrides do not create an isolated user
+or hide requested tool results from the selected AI provider. Manual startup,
+recovery and deployment acceptance remain the operator's responsibility.
+
 ## Acceptance before a compatibility claim
 
 1. Install the exact candidate in a fresh client task/profile after approval.

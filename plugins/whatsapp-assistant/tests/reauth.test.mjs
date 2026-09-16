@@ -37,6 +37,7 @@ exit 0
 `, { mode: 0o700 });
     const script = path.join(directory, "reauth.sh");
     writeFileSync(script, readFileSync(new URL("../scripts/reauth.sh", import.meta.url), "utf8")
+      .replace('DEFAULT_APP_ROOT="$HOME/Library/Application Support/WhatsApp Assistant"', `DEFAULT_APP_ROOT="${appRoot}"`)
       .replaceAll("/bin/launchctl", `"${mockLaunchctl}"`), { mode: 0o700 });
     chmodSync(mockNode, 0o700);
     const result = spawnSync("/bin/sh", [script], {

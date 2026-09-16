@@ -12,6 +12,14 @@ LOG_DIR="$HOME/Library/Logs/WhatsApp Assistant"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
+if [ "${WHATSAPP_ASSISTANT_HOME:-$APP_ROOT}" != "$APP_ROOT" ] ||
+   [ "${WHATSAPP_ASSISTANT_SOCKET:-$APP_ROOT/openwa.sock}" != "$APP_ROOT/openwa.sock" ] ||
+   [ "${WHATSAPP_ASSISTANT_SECRET_FILE:-$APP_ROOT/socket.secret}" != "$APP_ROOT/socket.secret" ] ||
+   [ "${WHATSAPP_ASSISTANT_CHROME:-$CHROME}" != "$CHROME" ]; then
+  echo "install.sh unterstuetzt nur die Standardpfade; abweichende WHATSAPP_ASSISTANT-Einstellungen geschlossen abgelehnt." >&2
+  exit 2
+fi
+
 if [ ! -f "$PLUGIN_ROOT/.codex-plugin/plugin.json" ]; then
   echo "Plugin-Manifest fehlt: $PLUGIN_ROOT/.codex-plugin/plugin.json" >&2
   exit 1
@@ -127,12 +135,16 @@ if [ ! -f "$APP_ROOT/.authenticated" ]; then
 fi
 
 escape_sed() {
-  printf '%s' "$1" | /usr/bin/sed 's/[&|]/\\&/g'
+  printf '%s' "$1" | /usr/bin/sed 's/[\\&|]/\\&/g'
 }
 
-NODE_ESCAPED=$(escape_sed "$RUNTIME_DIR/bin/node")
-DAEMON_ESCAPED=$(escape_sed "$RUNTIME_DIR/daemon.mjs")
-RUNTIME_ESCAPED=$(escape_sed "$RUNTIME_DIR")
+xml_text() {
+  printf '%s' "$1" | /usr/bin/sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'
+}
+
+NODE_ESCAPED=$(escape_sed "$(xml_text "$RUNTIME_DIR/bin/node")")
+DAEMON_ESCAPED=$(escape_sed "$(xml_text "$RUNTIME_DIR/daemon.mjs")")
+RUNTIME_ESCAPED=$(escape_sed "$(xml_text "$RUNTIME_DIR")")
 /usr/bin/sed \
   -e "s|__NODE_PATH__|$NODE_ESCAPED|g" \
   -e "s|__DAEMON_PATH__|$DAEMON_ESCAPED|g" \

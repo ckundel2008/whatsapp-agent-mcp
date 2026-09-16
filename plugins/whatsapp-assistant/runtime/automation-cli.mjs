@@ -6,7 +6,8 @@ import path from "node:path";
 const appRoot = process.env.WHATSAPP_ASSISTANT_HOME ||
   path.join(homedir(), "Library", "Application Support", "WhatsApp Assistant");
 const socketPath = process.env.WHATSAPP_ASSISTANT_SOCKET || path.join(appRoot, "openwa.sock");
-const secret = readFileSync(path.join(appRoot, "socket.secret"), "utf8").trim();
+const secretPath = process.env.WHATSAPP_ASSISTANT_SECRET_FILE || path.join(appRoot, "socket.secret");
+const secret = readFileSync(secretPath, "utf8").trim();
 
 function usage() {
   return [

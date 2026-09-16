@@ -4,6 +4,8 @@ Bring existing WhatsApp chats to your AI workflow — without exposing a local n
 
 **Codex · Claude Code · local MCP clients** | macOS | text only | source candidate 0.2.0
 
+[![Candidate checks](https://github.com/ckundel2008/whatsapp-agent-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ckundel2008/whatsapp-agent-mcp/actions/workflows/ci.yml)
+
 [Deutsch](docs/README.de.md) · [Installation](plugins/whatsapp-assistant/README.md) · [Compatibility](docs/COMPATIBILITY.md) · [Privacy](plugins/whatsapp-assistant/docs/PRIVACY.md) · [Contributing](CONTRIBUTING.md)
 
 Find the chat you need, summarize recent messages, and draft a reply. Interactive

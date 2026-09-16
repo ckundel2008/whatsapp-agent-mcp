@@ -8,6 +8,26 @@ local validation, no commit, remote, upload, daemon restart, account login,
 WhatsApp read or real send occurred. The user subsequently authorized GitHub
 source-candidate publication; that does not replace live acceptance.
 
+## Follow-up checks and corrections
+
+The published d2d621e source received an independent standard static security
+audit covering all 62 tracked files, with separate architecture and startup-
+boundary reviews. No new reportable vulnerability was established. Installed
+dependencies/private state/live accounts were excluded; this is not exhaustive
+security or authenticated client acceptance.
+
+Synthetic follow-up QA reproduced two operational failures: launchd plist
+generation failed for a path containing `&`/`<`, and MCP ignored the selected
+app root for socket/secret defaults. Correct XML plus sed escaping and consistent
+MCP/CLI path selection address them. New tests intercept file reads/connections
+before they can reach a real secret or daemon. Installer/reauth tests reject all
+four unsupported overrides before live effects; existing mocked rollback cases
+still run in an explicitly isolated default-root fixture.
+
+The follow-up suite contains 75 tests. macOS plist rendering also uses the real
+`plutil` parser; Linux checks the exact independently expected XML values, not
+macOS installation. No live installer, Chrome, launchd or WhatsApp action occurred.
+
 ## Passed
 
 - 58 Node.js tests under each Node version: policy persistence/privacy, legacy capability migration,
