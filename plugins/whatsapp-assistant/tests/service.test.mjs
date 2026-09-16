@@ -168,14 +168,15 @@ test("fixed browser send projection uses current message collections and returns
     return [Promise.resolve(message), Promise.resolve("success")];
   };
   class MsgKey {
+    static omitSerialized = false;
     static async newId() { return "AAAAAAAAAAAAAAAAAAAA"; }
     constructor(value) {
       Object.assign(this, value);
       this.fromMe = true;
       this.remote = value.to;
-      this._serialized = `true_${value.to}_${value.id}_${value.participant || value.from}`;
+      if (!MsgKey.omitSerialized) this._serialized = `true_${value.to}_${value.id}_${value.participant || value.from}`;
     }
-    toString() { return this._serialized; }
+    toString() { return `true_${this.to}_${this.id}_${this.participant || this.from}`; }
   }
   globalThis.window = {
     require: (name) => ({
@@ -236,6 +237,20 @@ test("fixed browser send projection uses current message collections and returns
     });
     assert.deepEqual(changedAccount, { status: "identity_changed" });
     assert.equal(sends, 1);
+
+    // Current MsgKey instances can expose their serialized key only via toString;
+    // .id alone is merely the stanza token, not the complete message identity.
+    MsgKey.omitSerialized = true;
+    const stringKey = await sendExistingTextProjection({
+      operation: "sendExistingText",
+      targetChatId: chat.id._serialized,
+      expectedTitle: "Team",
+      expectedGroup: true,
+      body: "key string confirmation",
+    });
+    assert.deepEqual(stringKey, { status: "sent", message_id: "true_22222222222@g.us_AAAAAAAAAAAAAAAAAAAA_me@lid" });
+    assert.equal(submittedMessage.id._serialized, undefined);
+    MsgKey.omitSerialized = false;
 
     addAndSendImpl = async () => [
       Promise.resolve(null),
