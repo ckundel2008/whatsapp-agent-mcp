@@ -17,6 +17,7 @@ OpenWA ist inoffiziell; Ausfaelle und Kontoeinschraenkungen sind moeglich.
 
 [Installation](../plugins/whatsapp-assistant/README.md) ·
 [Kompatibilitaet und Pruefstatus](COMPATIBILITY.md) ·
+[Haeufige Fragen](FAQ.md) ·
 [Datenschutz](../plugins/whatsapp-assistant/docs/PRIVACY.md) ·
 [Veroeffentlichung und offene Schritte](RELEASING.md)
 
@@ -28,5 +29,18 @@ werden. Die vorhandene installierte Version wird dadurch nicht automatisch geaen
 
 Wie beim Stream-Deck-Projekt: eigener Quellcode unter [MIT](../LICENSE),
 Herausgeber `ckundel2008`, Repository `ckundel2008/whatsapp-agent-mcp`.
-Die lokale installierte Version bleibt unveraendert. Fremde Abhaengigkeiten behalten ihre Lizenzen;
+Eine GitHub-Veroeffentlichung aktualisiert installierte Laufzeiten nicht automatisch.
+Die begrenzte lokale Abnahme steht in [CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md).
+Fremde Abhaengigkeiten behalten ihre Lizenzen;
 siehe [Drittanbieterhinweise](../THIRD_PARTY_NOTICES.md).
+
+Geeignet fuer bewusst ausgewaehlte Chats, Zusammenfassungen und vor dem Versand
+bestaetigte Textantworten aus einem lokalen KI-Workflow. Nicht geeignet fuer
+offizielle WhatsApp-Business-Anbindungen, Massenwerbung, Offline-KI oder eine
+geschaeftskritische Zustellgarantie. Die [Projektfakten](../project.json) und der
+optionale [Leseindex](../llms.txt) beschreiben Anforderungen und Grenzen.
+
+Ebenfalls von diesem Herausgeber:
+[Codex Stream Deck](https://github.com/ckundel2008/codex-stream-deck) fuer
+Codex-Aufgaben, Tastenkürzel und Wochenkontingent auf Elgato-Hardware am Mac.
+Ein separates Projekt, keine Abhaengigkeit und keine Claude-Erweiterung.

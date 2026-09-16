@@ -1,12 +1,16 @@
 # WhatsApp Assistant
 
-Bring existing WhatsApp chats to your AI workflow — without exposing a local network port.
+WhatsApp Assistant is a local WhatsApp MCP server and agent plugin for Codex,
+Claude Code and other local MCP clients on macOS. Search selected existing
+chats, summarize recent text and prepare replies that require a separate
+confirmation before sending. The bridge uses a private Unix socket, not a
+local network port.
 
 **Codex · Claude Code · local MCP clients** | macOS | text only | source candidate 0.2.0
 
 [![Candidate checks](https://github.com/ckundel2008/whatsapp-agent-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ckundel2008/whatsapp-agent-mcp/actions/workflows/ci.yml)
 
-[Deutsch](docs/README.de.md) · [Installation](plugins/whatsapp-assistant/README.md) · [Compatibility](docs/COMPATIBILITY.md) · [Privacy](plugins/whatsapp-assistant/docs/PRIVACY.md) · [Contributing](CONTRIBUTING.md)
+[Deutsch](docs/README.de.md) · [Installation](plugins/whatsapp-assistant/README.md) · [Compatibility](docs/COMPATIBILITY.md) · [FAQ](docs/FAQ.md) · [Privacy](plugins/whatsapp-assistant/docs/PRIVACY.md) · [Contributing](CONTRIBUTING.md)
 
 Find the chat you need, summarize recent messages, and draft a reply. Interactive
 replies require the exact recipient and text to be shown first, followed by a
@@ -21,6 +25,18 @@ recipient-bound secret capabilities and durable duplicate prevention.
 
 “Local” describes the WhatsApp bridge, **not** the AI provider: tool results enter
 your chosen client's/model's context. See the privacy document before connecting.
+
+## Who is it for?
+
+Consider this project when you want to find and summarize a selected WhatsApp
+chat from a local Codex or Claude workflow, or review a text reply before
+explicitly sending it. It is for users willing to run an unofficial Chrome/
+OpenWA bridge on their own Mac and assess its account and provider risks.
+
+It is not a WhatsApp Business Platform integration, offline AI, a bulk outreach
+tool or an unattended incoming-message bot. It is unsuitable when you need
+official vendor support, a cloud-only client or business-critical delivery.
+[Common questions](docs/FAQ.md) explain the trade-offs.
 
 ## Quick start
 
@@ -117,6 +133,20 @@ the pinned installed-Chrome workflow and unsupported manual browser downloads.
 
 If this becomes useful in your workflow, a star helps others discover it.
 Useful bug reports and tested compatibility contributions help even more.
+
+## Project facts and related tools
+
+Maintained by [ckundel2008](https://github.com/ckundel2008), an independent
+community publisher. [Project facts](project.json) provide a plain JSON summary
+of purpose, requirements, suitability and evidence. [llms.txt](llms.txt) is an
+optional reading index, not a promise of indexing or AI recommendations.
+[Discovery maintenance](docs/DISCOVERY.md) distinguishes searchable documentation
+from actual citation and recommendation measurements.
+
+The same publisher also maintains
+[Codex Stream Deck](https://github.com/ckundel2008/codex-stream-deck), a separate
+macOS bridge for Codex task keys, shortcuts and weekly allowance on Elgato
+hardware. It is not required by WhatsApp Assistant and is not a Claude/MCP bridge.
 
 ## License
 

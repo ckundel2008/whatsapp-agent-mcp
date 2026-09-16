@@ -1,10 +1,19 @@
 # Source publication and future releases
 
-0.2.0 is an **untagged source candidate** on
+0.2.0 is a **community source candidate** on
 [GitHub](https://github.com/ckundel2008/whatsapp-agent-mcp), not a stable release
 or authenticated cross-client acceptance. The user explicitly authorized source
 upload on 2026-09-16 after local preparation. This does not install the runtime,
 link an account, restart services, send messages or create a stable release.
+
+## Evaluation prerelease
+
+`v0.2.0-rc.1` identifies the reviewed source snapshot for evaluation; its source
+package and plugin versions remain `0.2.0`. It is explicitly a GitHub prerelease,
+not a stable `v0.2.0` release or proof that every prepared client was accepted.
+Source-only archives contain no dependencies, account state, QR codes or keys.
+The existing-client/runtime evidence and outstanding fresh-client/recovery
+checks are recorded in [CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md).
 
 ## Confirmed publishing metadata
 
