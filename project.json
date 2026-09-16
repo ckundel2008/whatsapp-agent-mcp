@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "name": "WhatsApp Assistant",
+  "repository": "https://github.com/ckundel2008/whatsapp-agent-mcp",
+  "summary": "Local WhatsApp MCP server and agent plugin for selected text chats and separately confirmed replies in Codex, Claude Code and other local MCP clients on macOS.",
+  "maintainer": { "name": "ckundel2008", "url": "https://github.com/ckundel2008" },
+  "license": {
+    "ownSource": "MIT",
+    "thirdPartyNotices": "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/THIRD_PARTY_NOTICES.md"
+  },
+  "kind": "local-stdio-mcp-server-and-agent-plugin",
+  "maturity": "community-source-prerelease",
+  "requirements": {
+    "platform": "macOS",
+    "node": ">=22.13",
+    "pnpm": "11.19.0",
+    "browser": "installed Google Chrome",
+    "account": "user-authorized WhatsApp account linked locally",
+    "client": "local Codex, Claude Code or compatible stdio MCP client"
+  },
+  "suitableFor": [
+    "Finding an intentionally selected existing WhatsApp chat",
+    "Summarizing selected recent text using the chosen AI client",
+    "Drafting a text reply and sending only after a new explicit recipient/text confirmation",
+    "Separately preauthorized narrowly scoped scheduled text sends"
+  ],
+  "unsuitableFor": [
+    "Official WhatsApp Business Platform integration or vendor-supported critical delivery",
+    "Bulk outreach, new-number sends or incoming-triggered automatic replies",
+    "Media downloads, calls or full-history archives",
+    "Windows/Linux runtime installation or cloud-only/remote/mobile clients",
+    "Offline AI or a promise that requested data never reaches an AI provider"
+  ],
+  "capabilities": [
+    "whatsapp_status",
+    "whatsapp_list_chats",
+    "whatsapp_read_messages",
+    "whatsapp_prepare_send",
+    "whatsapp_send_prepared",
+    "whatsapp_send_automation"
+  ],
+  "limitations": [
+    "Text reads are selected-chat, paginated and bounded to the last 30 days; incomplete history is reported",
+    "Unofficial OpenWA/WhatsApp Web integration may break or lead to account restrictions",
+    "The bridge has no TCP listener or own cloud relay; Chrome still connects to WhatsApp and tool data enters the chosen AI context",
+    "The host cannot cryptographically prove human confirmation or scheduler origin; bearer capabilities remain sensitive",
+    "GitHub source distribution only; packages remain private, not an npm-installed product",
+    "Own source MIT does not relicense OpenWA or other dependencies"
+  ],
+  "evidence": {
+    "reviewedAt": "2026-09-16",
+    "automatedTests": "75 synthetic runtime regression tests passed under Node 22.13 and 24 before these documentation-only changes",
+    "liveAcceptance": "Authorized default-runtime upgrade/restart, existing Codex tool path and dedicated-chat send confirmation with exact ID/text readback passed; fresh client installations, reboot/recovery and independent remote-device receipt pending",
+    "sourceLinks": [
+      "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/README.md",
+      "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/docs/FAQ.md",
+      "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/docs/COMPATIBILITY.md",
+      "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/docs/VALIDATION.md",
+      "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/docs/CLIENT_ACCEPTANCE.md",
+      "https://github.com/ckundel2008/whatsapp-agent-mcp/actions"
+    ]
+  },
+  "relatedProjects": [
+    {
+      "name": "Codex Stream Deck",
+      "repository": "https://github.com/ckundel2008/codex-stream-deck",
+      "relationship": "separate macOS Codex hardware project by the same publisher; not a dependency or Claude integration"
+    }
+  ]
+}
