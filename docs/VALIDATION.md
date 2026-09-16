@@ -1,7 +1,7 @@
 # Local validation — 2026-09-16
 
-Candidate: 0.2.0. Environment: macOS arm64, Node.js 22.12.0 / 24.20.0,
-pnpm 11.19.0. Node 22.12 was downloaded into the ignored validation directory
+Candidate: 0.2.0. Environment: macOS arm64, Node.js 22.13.0 / 24.20.0,
+pnpm 11.19.0. Node 22.13 was downloaded into the ignored validation directory
 from nodejs.org and matched its official SHA-256; no global runtime was changed.
 Original source and installed personal plugin/runtime were not changed. During
 local validation, no commit, remote, upload, daemon restart, account login,
@@ -36,6 +36,11 @@ source-candidate publication; that does not replace live acceptance.
 - A separate clean production-only copy installed from the frozen lockfile
   without inherited node_modules, with lifecycle scripts disabled. Both Node
   import/process controls and its zero-known-vulnerability audit passed there.
+- A further empty dependency directory verified a fresh frozen install and audit
+  with pnpm 11.19.0 actually running under Node 22.13.0. The first hosted run
+  exposed that pnpm requires Node 22.13, despite the earlier 22.12 runtime-only
+  controls passing. Installer, package engines, instructions and exact-floor CI
+  now agree on 22.13; the minimum-version job was retained, not skipped.
 - Source package verification checks regular-file inventory and every archived
   content hash. A tampered-archive negative control is rejected before extraction.
 - MIT root/plugin LICENSE, portable/Codex/Claude/package license/author/URL

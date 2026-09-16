@@ -6,7 +6,7 @@
   "author": "ckundel2008",
   "license": "MIT",
   "engines": {
-    "node": ">=22.12"
+    "node": ">=22.13"
   },
   "packageManager": "pnpm@11.19.0",
   "dependencies": {

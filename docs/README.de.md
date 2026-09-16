@@ -11,7 +11,7 @@ Geplante Aufgaben benoetigen eine vorher autorisierte, eng begrenzte Regel
 mit eigener geheimer Capability. Keine neuen Nummern, Medien, Massenversand
 oder durch eingehende Nachrichten ausgeloeste Auto-Antworten.
 
-Die Runtime benoetigt macOS, Google Chrome, Node.js 22.12+ und pnpm 11.19.0.
+Die Runtime benoetigt macOS, Google Chrome, Node.js 22.13+ und pnpm 11.19.0.
 QR-Code und Sitzungsdaten nie in Aufgaben, GitHub-Issues oder Screenshots teilen.
 OpenWA ist inoffiziell; Ausfaelle und Kontoeinschraenkungen sind moeglich.
 

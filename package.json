@@ -7,7 +7,7 @@
   "license": "MIT",
   "homepage": "https://github.com/ckundel2008/whatsapp-agent-mcp",
   "repository": { "type": "git", "url": "https://github.com/ckundel2008/whatsapp-agent-mcp.git" },
-  "engines": { "node": ">=22.12" },
+  "engines": { "node": ">=22.13" },
   "scripts": {
     "test": "node --test plugins/whatsapp-assistant/tests/*.test.mjs",
     "check": "node scripts/check-release.mjs",

@@ -12,7 +12,7 @@ pnpm audit --prod
 node ../scripts/check-runtime.mjs
 ```
 
-Use Node.js 22.12+ and the pinned pnpm 11.19.0. Tests use isolated fixtures and a
+Use Node.js 22.13+ and the pinned pnpm 11.19.0. Tests use isolated fixtures and a
 mocked launchctl/daemon; they must not read a real WhatsApp account or start
 Chrome. Do not run install/reauth/status/send scripts against another person's
 session. No real WhatsApp acceptance or external messages without permission.
