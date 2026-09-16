@@ -47,7 +47,7 @@ an `mcpName` registration or a public HTTP endpoint for visibility.
 ## Maintain factual consistency
 
 Update facts and source links after actual product changes. Preserve the six
-tool names, macOS/local-client requirements, source-candidate status, provider
+tool names, macOS/local-client requirements, Codex-focused release scope, provider
 exposure, unofficial-account risk and separate third-party licenses. Mark a
 client as accepted only after the [real acceptance checks](CLIENT_ACCEPTANCE.md).
 Keep related projects explicitly separate: Stream Deck hardware is not required

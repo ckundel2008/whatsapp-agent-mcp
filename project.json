@@ -9,7 +9,19 @@
     "thirdPartyNotices": "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/THIRD_PARTY_NOTICES.md"
   },
   "kind": "local-stdio-mcp-server-and-agent-plugin",
-  "maturity": "community-source-prerelease",
+  "maturity": "stable-community-source-codex-focused",
+  "release": {
+    "tag": "v0.2.0",
+    "scope": "Existing Codex Desktop interactive path with runtime 0.2.0; fresh plugin installation, recovery and real scheduled sends untested",
+    "clientSupport": {
+      "codex": "primary target; existing-client interactive path live-tested, cached plugin 0.1.0, runtime 0.2.0",
+      "claudeCode": "experimental; format/protocol checks only",
+      "claudeDesktop": "experimental; configuration/protocol checks only",
+      "cursor": "experimental; configuration/protocol checks only",
+      "vscode": "experimental; configuration/protocol checks only",
+      "otherLocalMcpClients": "experimental; no blanket compatibility claim"
+    }
+  },
   "requirements": {
     "platform": "macOS",
     "node": ">=22.13",

@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "whatsapp-assistant",
   "version": "0.2.0",
-  "description": "Local WhatsApp MCP tools for Codex and Claude on macOS: scoped text reads, separately confirmed replies and constrained scheduled sends.",
+  "description": "Local WhatsApp MCP tools for Codex on macOS: scoped reads and confirmed replies. Claude and other MCP clients are experimental.",
   "author": { "name": "ckundel2008", "url": "https://github.com/ckundel2008" },
   "homepage": "https://github.com/ckundel2008/whatsapp-agent-mcp",
   "repository": "https://github.com/ckundel2008/whatsapp-agent-mcp",

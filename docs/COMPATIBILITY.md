@@ -3,14 +3,28 @@
 All clients must run locally on the Mac hosting the WhatsApp daemon. A compatible
 file format is not proof of authenticated client acceptance.
 
+## Release scope
+
+`v0.2.0` is a stable, Codex-focused community source release. Its live evidence
+covers the existing Codex Desktop path with runtime 0.2.0: status, selected-chat
+search/read, preparation without delivery and confirmed interactive text sending
+with exact ID/text readback and one-time approval rejection. The cached client
+plugin was 0.1.0; a fresh 0.2.0 plugin installation and the exact Codex app version
+were not recorded. See [CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md).
+
+Claude Code, Claude Desktop, Cursor, VS Code and generic MCP integrations remain
+experimental. They do not block the scoped Codex release, but must not be marked
+live-tested without their own evidence. Fresh installation, reboot/recovery,
+independent other-device receipt and real scheduled sends remain untested.
+
 | Client | Integration prepared | Verification in this checkout |
 | --- | --- | --- |
-| Codex | Portable Agent Plugins + compatibility manifest + repository marketplace | Manifest/path checks, stdio initialization and tool tests; fresh app acceptance pending |
-| Claude Code | `.claude-plugin/plugin.json`, Claude marketplace, shared skill + stdio MCP | Manifest/path checks and simulated plugin-root launch; actual Claude Code installation pending |
-| Claude Desktop | Generated absolute-path local MCP configuration | JSON and subprocess stdio smoke test; desktop acceptance pending |
-| Cursor | Generated absolute-path local MCP configuration | JSON and subprocess stdio smoke test; editor acceptance pending |
-| VS Code | Generated `servers`-format MCP configuration | JSON and subprocess stdio smoke test; editor acceptance pending |
-| Other stdio MCP clients | Generic absolute-path configuration + `whatsapp-safety` prompt | Protocol smoke tests, not a blanket compatibility claim |
+| Codex | Primary release target; portable Agent Plugins + compatibility manifest + repository marketplace | Existing-client/runtime interactive path live-tested as scoped above; manifest/stdio tests; fresh 0.2.0 plugin installation untested |
+| Claude Code | Experimental `.claude-plugin/plugin.json`, marketplace, shared skill + stdio MCP | Manifest/path checks and simulated plugin-root launch; actual installation pending |
+| Claude Desktop | Experimental absolute-path local MCP configuration | JSON and subprocess stdio smoke test; desktop acceptance pending |
+| Cursor | Experimental absolute-path local MCP configuration | JSON and subprocess stdio smoke test; editor acceptance pending |
+| VS Code | Experimental `servers`-format MCP configuration | JSON and subprocess stdio smoke test; editor acceptance pending |
+| Other stdio MCP clients | Experimental generic configuration + `whatsapp-safety` prompt | Protocol smoke tests, not a blanket compatibility claim |
 
 The portable package uses the [Agent Plugins formats](https://agent-plugins.org/).
 Codex still supports its compatibility overlay and [repository marketplaces](https://developers.openai.com/plugins/build/plugins).

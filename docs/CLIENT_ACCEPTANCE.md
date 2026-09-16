@@ -96,4 +96,7 @@ message bodies, capabilities and backup paths are excluded from this record.
 This is API/current-WhatsApp-model readback, not independent receipt on another
 device. Fresh Codex/Claude Code/Claude Desktop/Cursor/VS Code installations,
 reboot, reauthentication, uninstall and real scheduled-send acceptance remain
-pending. It does not establish universal client compatibility or a stable release.
+pending. It does not establish universal client compatibility. The subsequently
+authorized stable `v0.2.0` source release is deliberately Codex-focused and relies
+only on the existing-client interactive evidence above; it does not convert any
+pending test into a pass. See [the release scope](COMPATIBILITY.md#release-scope).

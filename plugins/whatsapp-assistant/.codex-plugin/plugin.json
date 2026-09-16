@@ -1,7 +1,7 @@
 {
   "name": "whatsapp-assistant",
   "version": "0.2.0",
-  "description": "Local WhatsApp MCP tools for Codex and Claude on macOS: scoped text reads, separately confirmed replies and constrained scheduled sends.",
+  "description": "Local WhatsApp MCP tools for Codex on macOS: scoped text reads, confirmed replies and separately authorized experimental scheduled sends.",
   "author": {
     "name": "ckundel2008",
     "url": "https://github.com/ckundel2008"
@@ -13,8 +13,8 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "WhatsApp Assistant",
-    "shortDescription": "WhatsApp MCP for Codex and Claude on macOS.",
-    "longDescription": "Find and summarize selected existing WhatsApp text chats through a local OpenWA/Chrome daemon. Interactive replies require separate confirmation; scheduled sends require a secret, narrowly scoped prior authorization. Tool results enter your chosen AI client's context and may reach its provider. Community source candidate, not an official integration.",
+    "shortDescription": "WhatsApp MCP for Codex on macOS.",
+    "longDescription": "Find and summarize selected existing WhatsApp text chats through a local OpenWA/Chrome daemon. Codex-focused stable community source release with limited existing-client live evidence; Claude and other MCP clients are experimental. Interactive replies require separate confirmation; experimental scheduled sends require secret prior authorization. Tool results enter your AI client's context and may reach its provider. Fresh installation and recovery are untested; not an official integration.",
     "developerName": "ckundel2008",
     "websiteURL": "https://github.com/ckundel2008/whatsapp-agent-mcp",
     "privacyPolicyURL": "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/plugins/whatsapp-assistant/docs/PRIVACY.md",

@@ -1,16 +1,33 @@
 # Source publication and future releases
 
-0.2.0 is a **community source candidate** on
-[GitHub](https://github.com/ckundel2008/whatsapp-agent-mcp), not a stable release
-or authenticated cross-client acceptance. The user explicitly authorized source
-upload on 2026-09-16 after local preparation. This does not install the runtime,
-link an account, restart services, send messages or create a stable release.
+`v0.2.0` is a **stable Codex-focused community source release** on
+[GitHub](https://github.com/ckundel2008/whatsapp-agent-mcp), deliberately scoped
+to the live-tested existing Codex Desktop interactive path with runtime 0.2.0.
+The maintainer authorized this scope on 2026-09-16. Publication does not install
+the runtime, link an account, restart services or send messages.
+
+## Stable scope and explicit exclusions
+
+The existing Codex path passed status, selected-chat search/read, preparation
+without delivery and confirmed interactive text sending with exact own-message
+ID/text readback and one-time approval rejection. The cached client plugin was
+0.1.0 against runtime 0.2.0; a fresh 0.2.0 plugin installation and exact Codex
+app version were not recorded. This evidence is retained in
+[CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md), not upgraded into unperformed tests.
+
+Claude Code, Claude Desktop, Cursor, VS Code and generic local MCP integrations
+remain **experimental**. Their acceptance does not block this Codex-focused
+release. Fresh installation, reboot, reauthentication, uninstall, independent
+other-device receipt and real scheduled-send acceptance remain untested. Stable
+source publication is not universal compatibility, vendor endorsement or a
+business-critical delivery guarantee. Preserve confirmations, capability checks,
+duplicate controls, backup requirements and account/provider warnings.
 
 ## Evaluation prerelease
 
-`v0.2.0-rc.1` identifies the reviewed source snapshot for evaluation; its source
-package and plugin versions remain `0.2.0`. It is explicitly a GitHub prerelease,
-not a stable `v0.2.0` release or proof that every prepared client was accepted.
+The historical `v0.2.0-rc.1` tag remains an evaluation source snapshot; its source
+package and plugin versions are `0.2.0`. It remains a GitHub prerelease and is
+not relabeled or overwritten by the separate stable `v0.2.0` tag.
 Source-only archives contain no dependencies, account state, QR codes or keys.
 The existing-client/runtime evidence and outstanding fresh-client/recovery
 checks are recorded in [CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md).
@@ -24,7 +41,7 @@ are included; portable/Codex/Claude/package metadata and Claude marketplace owne
 are aligned. The local Git commit identity matches the other project and uses
 its GitHub noreply address. Future publication must still be deliberate.
 
-## Remaining acceptance and release gates
+## Publication checks and remaining client work
 
 - Dependencies retain their own licenses. Review their actual use/redistribution
   obligations; MIT metadata does not grant rights over OpenWA. See THIRD_PARTY_NOTICES.
@@ -32,8 +49,9 @@ its GitHub noreply address. Future publication must still be deliberate.
   override removes extract-zip rather than suppressing its advisories; preserve
   lifecycle/browser-download restrictions and rerun both supported Node import/
   process checks after changes. See [DEPENDENCIES](DEPENDENCIES.md).
-- Complete approved fresh Codex and Claude Code acceptance; record additional
-  Desktop/Cursor/VS Code results before marking each as tested.
+- Complete approved fresh Codex installation and recovery checks as additional
+  acceptance work. Record Claude Code/Desktop/Cursor/VS Code results before
+  changing their experimental status; do not invent a successful client test.
 - GitHub private vulnerability reporting is enabled. Verify it remains available
   before future publication; never report private chat material in public issues.
 
@@ -57,7 +75,8 @@ The normal checker validates candidate structure, version alignment, source
 syntax, local doc links and high-signal private-file/secret patterns. It is not
 an exhaustive secret/security audit. `node scripts/check-release.mjs --publish`
 also refuses publication without license/repository/publisher metadata and a
-passing dependency audit. Client acceptance remains a human-reviewed gate.
+passing dependency audit. The release scope and actual client evidence remain
+human-reviewed; the checker does not grant publication authority.
 
 Create a private reviewed candidate package from the repository root:
 
@@ -86,14 +105,15 @@ against the current source. Any subsequent source change requires rebuilding.
    release and live acceptance; no automatic deployment.
 5. Run GitHub CI; enable private vulnerability reports and suitable branch
    protection. Add agreed description and topics, not unsupported product claims.
-6. Verify the prepared owner/repo installation commands against the published
-   marketplace source before announcing it. Verify both clients.
-7. Tag an explicit reviewed version; publish release notes with migration and
-   candid limitations. Avoid a stable 0.2.0 tag until the candidate is accepted.
+6. Verify owner/repo and pinned-ref installation commands against the published
+   marketplace source. Label other clients experimental until actually accepted.
+7. Tag the explicit reviewed version and publish source-only assets, checksums,
+   migration notes, exact Codex scope and all untested cases. Preserve historical
+   tags/releases; never equate a stable channel with universal live acceptance.
 
 Suggested repository description:
-“Local WhatsApp MCP tools for Codex, Claude Code and AI agents — scoped reads,
-confirmed replies, and constrained scheduled sends.”
+“Local WhatsApp MCP tools for Codex on macOS: scoped reads and confirmed replies.
+Stable community source release; Claude and other MCP clients experimental.”
 
 Suggested discovery topics: `whatsapp`, `mcp`, `mcp-server`, `codex`,
 `claude-code`, `agent-skills`, `local-first`, `privacy`, `macos`.

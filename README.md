@@ -6,7 +6,13 @@ chats, summarize recent text and prepare replies that require a separate
 confirmation before sending. The bridge uses a private Unix socket, not a
 local network port.
 
-**Codex · Claude Code · local MCP clients** | macOS | text only | source candidate 0.2.0
+**Codex-focused community release 0.2.0** | macOS | text only
+
+The existing Codex Desktop path was live-tested with runtime 0.2.0 for status,
+selected-chat search/read and separately confirmed interactive text sending.
+Claude Code, Claude Desktop, Cursor, VS Code and other MCP clients are
+**experimental**. Fresh plugin installation, recovery and real scheduled-send
+acceptance are not claimed. See [the exact evidence](docs/CLIENT_ACCEPTANCE.md).
 
 [![Candidate checks](https://github.com/ckundel2008/whatsapp-agent-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ckundel2008/whatsapp-agent-mcp/actions/workflows/ci.yml)
 
@@ -62,14 +68,14 @@ Install **whatsapp-assistant** from **WhatsApp Assistant Community** in the
 supported desktop plugin directory, then start a new task. Registration does
 not install the WhatsApp runtime or imply live acceptance.
 
-Claude Code, from the repository root:
+Experimental Claude Code setup, from the repository root:
 
 ```text
 /plugin marketplace add .
 /plugin install whatsapp-assistant@whatsapp-assistant-community
 ```
 
-Other local MCP clients, including Claude Desktop and Cursor:
+Experimental local MCP clients, including Claude Desktop and Cursor:
 
 ```sh
 node plugins/whatsapp-assistant/scripts/mcp-config.mjs claude-desktop
@@ -81,11 +87,10 @@ client settings. Merge it into the appropriate client configuration. Load the
 `whatsapp-safety` MCP prompt or the bundled skill before using the tools.
 
 Source repository: [ckundel2008/whatsapp-agent-mcp](https://github.com/ckundel2008/whatsapp-agent-mcp).
-The `main` branch is a source candidate, not an authenticated cross-client
-acceptance or stable tagged release. Register it with:
+Use the pinned `v0.2.0` source release for reproducible registration:
 
 ```sh
-codex plugin marketplace add ckundel2008/whatsapp-agent-mcp --ref main
+codex plugin marketplace add ckundel2008/whatsapp-agent-mcp --ref v0.2.0
 ```
 
 ```text
@@ -114,21 +119,25 @@ This is a community project, not an official WhatsApp/Meta, OpenAI, or Anthropic
 integration. OpenWA/WhatsApp Web can change without notice, and unofficial
 automation can lead to account restrictions. Avoid business-critical reliance.
 
-The MCP runtime and safety regressions are tested locally. Client packaging is
-prepared against official formats; fresh authenticated Codex/Claude/Desktop/
-Cursor acceptance has **not** been claimed. Windows, Linux runtime installation,
-remote/cloud-only clients, and mobile clients are not supported.
+The MCP runtime and safety regressions are tested locally. The stable community
+release is Codex-focused, based on the existing client path's live interactive
+checks. That client's cached plugin was 0.1.0 against runtime 0.2.0; a fresh
+0.2.0 plugin installation was not tested. Other client packaging is experimental.
+Reboot, reauthentication, uninstall, real scheduled-send acceptance and
+independent receipt on another device remain untested. Windows, Linux runtime
+installation, remote/cloud-only clients, and mobile clients are unsupported.
 
 The frozen dependency audit currently reports no known vulnerabilities.
 Publisher/repository is `ckundel2008/whatsapp-agent-mcp`, with MIT for own source.
-Private vulnerability reporting is enabled on GitHub. A stable tagged release
-still requires real client acceptance; dependencies retain their own obligations.
+Private vulnerability reporting is enabled on GitHub. Stable source publication
+does not mean universal client acceptance or vendor-supported delivery;
+dependencies retain their own obligations.
 See [Release checklist](docs/RELEASING.md). This is not a zero-risk or fully
 audited security product. [Changelog](CHANGELOG.md) · [Security](SECURITY.md)
 
-Prepared [release notes](docs/RELEASE_NOTES.md) and
-[client acceptance plan](docs/CLIENT_ACCEPTANCE.md) keep tested facts separate
-from planned publication. [Dependency maintenance](docs/DEPENDENCIES.md) explains
+[Release notes](docs/RELEASE_NOTES.md) and the
+[client acceptance record](docs/CLIENT_ACCEPTANCE.md) keep tested facts separate
+from remaining checks. [Dependency maintenance](docs/DEPENDENCIES.md) explains
 the pinned installed-Chrome workflow and unsupported manual browser downloads.
 
 If this becomes useful in your workflow, a star helps others discover it.
