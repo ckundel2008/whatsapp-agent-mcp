@@ -102,3 +102,22 @@ context and same-user local processes remain trust boundaries.
 The local candidate package is ignored/private and contains only reviewed
 non-ignored source files with SHA-256 inventory. It is not an accepted stable
 release asset. Further file changes require refreshing candidate checks/package.
+
+## Authorized live follow-up and MsgKey correction
+
+After the source-only checks above, the user separately authorized a private
+backup, local runtime update/restart and a dedicated existing test chat. The
+limited live results and their remaining boundaries are recorded in
+[CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md#authorized-live-follow-up--2026-09-16).
+The historical “no live action” statements above describe the earlier phase only.
+
+A real text appeared once while the send API returned an unconfirmed result.
+A synthetic string-only MsgKey reproduced the failure before correction; the
+same control passed afterward. Complete serialized-key handling now precedes
+the stanza-token field, without relaxing exact ID/account/recipient/text checks.
+A new distinct live control then passed send confirmation, exact ID/text readback
+and one-time approval rejection. The full 75-test suite passed freshly under
+Node 22.13.0 and 24.20.0; publication checks and the frozen dependency audit passed.
+An independent read-only review found no concrete regression in this scoped fix.
+These results do not turn pending fresh-client, reboot or remote-device tests into
+accepted cases, and no unknown delivery was automatically retried.

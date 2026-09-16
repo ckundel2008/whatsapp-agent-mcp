@@ -1,6 +1,7 @@
 # Client acceptance record
 
-This is the prepared **manual acceptance plan**, not a record of live tests.
+The checklist below is the prepared **manual acceptance plan**. The separately
+dated follow-up at the end records the limited live checks actually performed.
 Local protocol tests do not prove installation, account access or delivery in a
 real AI client. Obtain approval before installing/replacing the runtime, linking
 an account, restarting launchd or sending to a dedicated existing test chat.
@@ -16,7 +17,7 @@ Never put QR codes, real conversations, phone numbers or capabilities in reports
 | Installation method / fresh client restart | Pending |
 | Six tools and `whatsapp-safety` prompt discovered | Pending |
 | Read-only checks | Pending |
-| Explicitly approved test delivery | Not authorized / pending |
+| Explicitly approved test delivery | Pending for fresh client installations |
 | Recovery / uninstall | Not authorized / pending |
 | Result and limitations | Not tested |
 
@@ -56,3 +57,43 @@ Do not change [COMPATIBILITY](COMPATIBILITY.md) to “tested” without the evid
 Before an upgrade, preserve the existing runtime, launchd plist and private app
 state outside the repository with owner-only permissions. The installer performs
 live account/service actions; do not run it as a source-only release check.
+
+## Authorized live follow-up — 2026-09-16
+
+Environment: macOS arm64 26.5.2, Node 24.20.0, pnpm 11.19.0, installed Google
+Chrome 152.0.7977.83. The user authorized a private backup, the default local
+runtime update, its exact LaunchAgent restart and tests in an existing dedicated
+group chat. No QR login, account replacement, media download, other-chat write
+or scheduled-rule authorization was performed. Private account/chat identifiers,
+message bodies, capabilities and backup paths are excluded from this record.
+
+- Runtime 0.1.0 was upgraded to candidate 0.2.0, followed by a same-candidate
+  message-ID correction. Owner-only backups remain outside the repository.
+  Runtime hashes, a new running daemon, actual `CONNECTED` status and unchanged
+  masked-account signal were read back. Keys, policy, delivery journal and the
+  existing authentication marker remained byte-identical; historical unknown
+  deliveries and legacy rules were not retried or reauthorized.
+- A fresh local stdio client initialized MCP 0.2.0, discovered all six closed
+  tool schemas and the safety prompt, and called the real daemon status. The
+  scheduled-send tool still requires its separate rule capability.
+- The existing Codex Desktop WhatsApp tools searched a complete, unique title
+  match without previews and read only the selected test chat. Its cached plugin
+  is still 0.1.0: this proves the existing client-to-updated-daemon path, not a
+  fresh 0.2.0 plugin installation. The desktop application's exact version was
+  not recorded.
+- The first distinct synthetic text appeared once, but its API send confirmation
+  failed. Its consumed approval was rejected and the original send was never
+  retried. A synthetic MsgKey exposing its complete ID only through `toString()`
+  reproduced the false `unconfirmed` result. The sender now uses that complete
+  key instead of mistaking its `.id` stanza token for the serialized message ID;
+  exact ID, own-message and text checks remain in place.
+- After that fix, a **new, different** synthetic control text returned a
+  confirmed send result. Its exact text and returned message ID were read back
+  as one own message, and reusing its approval was rejected. Preparation alone
+  did not change the latest selected-chat message. Both distinct test texts were
+  observed once; no test created a scheduled rule or modified another chat.
+
+This is API/current-WhatsApp-model readback, not independent receipt on another
+device. Fresh Codex/Claude Code/Claude Desktop/Cursor/VS Code installations,
+reboot, reauthentication, uninstall and real scheduled-send acceptance remain
+pending. It does not establish universal client compatibility or a stable release.

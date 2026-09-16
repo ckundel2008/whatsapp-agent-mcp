@@ -22,6 +22,9 @@ provider; “local” does not mean that selected chat data stays off the AI hos
 - Account-bound, exact-text one-time reply approvals. Scheduled rules require
   separate once-issued secret capabilities, plus recipient/account/rate/expiry
   controls and durable idempotency.
+- Complete current MsgKey serialization prevents a false unconfirmed result
+  when the web client exposes its message ID through `toString()` only. A new
+  dedicated-chat control verified send confirmation and exact ID/text readback.
 - JSON-RPC error/notification hardening, reauthentication backup/recovery and
   synthetic regression tests. GitHub CI and private candidate packaging prepared.
 
@@ -34,8 +37,10 @@ protected saved task with the newly issued capability. See
 
 ## Honest limitations
 
-macOS and installed Google Chrome are the supported runtime target. Real client
-installation, launchd/reboot/recovery and WhatsApp delivery acceptance are still
+macOS and installed Google Chrome are the supported runtime target. An authorized
+default-runtime upgrade/restart and existing Codex-tool path passed the limited
+checks in [CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md). Fresh client installations,
+reboot/reauthentication/uninstall and independent remote-device receipt remain
 pending. Protocol simulations are not authenticated Codex/Claude acceptance.
 Windows/Linux runtime support, public/cloud HTTP access, media and new-contact
 sends are not included. This is an unofficial project, not endorsed by WhatsApp,

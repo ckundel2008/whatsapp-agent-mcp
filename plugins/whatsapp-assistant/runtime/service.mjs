@@ -309,11 +309,21 @@ export async function sendExistingTextProjection({
   if (typeof sendTextToChat !== "function") return { status: "send_unavailable" };
 
   const messageIdOf = (value) => {
-    if (typeof value === "string") return value.length >= 10 ? value : "";
-    const candidate = value?._serialized || value?.id?._serialized || value?.id ||
-      value?.key?._serialized || value?.key || value?.message?.id?._serialized ||
-      value?.message?.id || value?.msg?.id?._serialized || value?.msg?.id;
-    return candidate ? String(candidate) : "";
+    const serializedKey = (key) => {
+      if (typeof key === "string") return key.length >= 10 ? key : "";
+      if (typeof key?._serialized === "string" && key._serialized.length >= 10) return key._serialized;
+      // A MsgKey's .id is only its stanza token. Current web clients can expose
+      // the complete remote/participant-bound identity through toString only.
+      const text = typeof key?.toString === "function" ? String(key) : "";
+      return /^(true|false)_/.test(text) && text.length >= 10 ? text : "";
+    };
+    const direct = serializedKey(value);
+    if (direct) return direct;
+    for (const key of [value?.id, value?.key, value?.message?.id, value?.msg?.id]) {
+      const id = serializedKey(key);
+      if (id) return id;
+    }
+    return "";
   };
   const pending = await sendTextToChat(chat, body);
   const expectedMessageId = messageIdOf(pending?.id);
