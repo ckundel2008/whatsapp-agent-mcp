@@ -20,7 +20,8 @@
   exceptions. Verified the installed-Chrome API contract under Node 22.12/24;
   manual Puppeteer browser downloads are not a supported workflow.
 - Public English/German docs, contributor/security/privacy guidance, CI and
-  release guards. Node.js minimum is now 22.12; install skips lifecycle scripts.
+  release guards. Node.js minimum is 22.13, matching pinned pnpm 11.19.0;
+  install skips lifecycle scripts. CI tests that exact installation floor.
 - Draft release notes, per-client acceptance plan and source-archive verification
   against the source/checksum inventory.
 - MIT own-source licensing and public publisher `ckundel2008`, with prepared

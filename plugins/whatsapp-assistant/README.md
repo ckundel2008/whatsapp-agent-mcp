@@ -6,7 +6,7 @@ your chosen AI client/provider's context: [Privacy](docs/PRIVACY.md).
 
 ## Requirements and risk
 
-macOS, installed Google Chrome, Node.js 22.12+ and pnpm 11.19.0. This is an
+macOS, installed Google Chrome, Node.js 22.13+ and pnpm 11.19.0. This is an
 unofficial OpenWA integration, not affiliated with WhatsApp/Meta. WhatsApp Web
 changes can break it; unofficial automation may lead to account restrictions.
 Review the source and make your own informed account-risk decision before setup.

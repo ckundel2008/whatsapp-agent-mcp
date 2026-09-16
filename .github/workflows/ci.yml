@@ -28,7 +28,7 @@ jobs:
   dependencies:
     strategy:
       matrix:
-        node: [22.12.0, 24]
+        node: [22.13.0, 24]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6

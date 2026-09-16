@@ -22,7 +22,7 @@ your chosen client's/model's context. See the privacy document before connecting
 
 ## Quick start
 
-Requires macOS, Google Chrome, Node.js 22.12+ and pnpm 11.19.0. Review the source
+Requires macOS, Google Chrome, Node.js 22.13+ and pnpm 11.19.0. Review the source
 and the unofficial WhatsApp-account risk before running the setup script.
 
 From a local checkout:

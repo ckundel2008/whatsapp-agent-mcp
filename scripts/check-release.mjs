@@ -40,6 +40,8 @@ export function checkRelease({ publish = false } = {}) {
   assert.equal(readFileSync(path.join(plugin, "LICENSE"), "utf8"), readFileSync(path.join(repoRoot, "LICENSE"), "utf8"));
   assert.equal(runtime.dependencies["@open-wa/wa-automate"], "4.76.0");
   assert.equal(runtime.packageManager, "pnpm@11.19.0");
+  assert.equal(runtime.engines.node, ">=22.13");
+  assert.equal(repository.engines.node, runtime.engines.node);
   const workspace = readFileSync(path.join(plugin, "runtime/pnpm-workspace.yaml"), "utf8");
   assert.match(workspace, /^  '@puppeteer\/browsers': 3\.2\.2$/m);
   assert.doesNotMatch(readFileSync(path.join(plugin, "runtime/pnpm-lock.yaml"), "utf8"), /\bextract-zip(?:@|:)/);
