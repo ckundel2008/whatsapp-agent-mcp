@@ -23,10 +23,14 @@ not a claim that Puppeteer 23 normally requires v3.
 The existing core launch APIs remain available. `check-runtime.mjs` verifies
 OpenWA/Puppeteer imports, Puppeteer 23's Chrome argument builder and the upgraded
 process/pipe API with a synthetic Node child. These pass under the actual
-supported floor Node 22.12.0 and Node 24.20.0 on macOS arm64. No real browser or
+supported installation floor Node 22.13.0 and Node 24.20.0 on macOS arm64. No real browser or
 account was opened. The lockfile/resolution checks prove the original vulnerable
 package cannot be loaded through this dependency tree; audit now reports no
 known vulnerabilities without advisory exclusions.
+
+The pinned pnpm 11.19.0 itself requires Node 22.13. Earlier runtime-only checks
+also passed with 22.12, but that version cannot run the installation toolchain.
+CI therefore verifies a frozen install with pnpm on the exact 22.13.0 floor.
 
 **Not supported:** manual Puppeteer browser downloads/postinstall. Puppeteer 23's
 downloader calls the removed public helper. Keep `PUPPETEER_SKIP_DOWNLOAD=1`,
@@ -44,7 +48,7 @@ pnpm audit --prod
 node ../scripts/check-runtime.mjs
 ```
 
-Repeat the import/process check with Node 22.12.0 and a current supported Node
+Repeat the install and import/process checks with Node 22.13.0 and a current supported Node
 release, then run the source checker and full tests. Review every override against
 its actual caller API, not just audit version ranges. Deprecated packages still
 exist in OpenWA's tree; a clean advisory result does not make them maintained or

@@ -50,7 +50,7 @@ find_pnpm() {
 }
 
 SOURCE_NODE=$(find_node) || {
-  echo "Keine Node.js-Laufzeit gefunden. Node.js 22.12 oder neuer ist erforderlich." >&2
+  echo "Keine Node.js-Laufzeit gefunden. Node.js 22.13 oder neuer ist erforderlich." >&2
   exit 1
 }
 SOURCE_PNPM=$(find_pnpm) || {
@@ -60,8 +60,8 @@ SOURCE_PNPM=$(find_pnpm) || {
 
 NODE_MAJOR=$("$SOURCE_NODE" -p 'Number(process.versions.node.split(".")[0])')
 NODE_MINOR=$("$SOURCE_NODE" -p 'Number(process.versions.node.split(".")[1])')
-if [ "$NODE_MAJOR" -lt 22 ] || { [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -lt 12 ]; }; then
-  echo "Node.js 22.12 oder neuer ist erforderlich." >&2
+if [ "$NODE_MAJOR" -lt 22 ] || { [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -lt 13 ]; }; then
+  echo "Node.js 22.13 oder neuer ist erforderlich." >&2
   exit 1
 fi
 
