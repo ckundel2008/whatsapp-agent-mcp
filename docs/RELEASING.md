@@ -1,125 +1,73 @@
-# Source publication and future releases
+# Release and publication process
 
-`v0.2.0` is a **stable Codex-focused community source release** on
-[GitHub](https://github.com/ckundel2008/whatsapp-agent-mcp), deliberately scoped
-to the live-tested existing Codex Desktop interactive path with runtime 0.2.0.
-The maintainer authorized this scope on 2026-09-16. Publication does not install
-the runtime, link an account, restart services or send messages.
+`v0.3.0` is a local candidate, not a public plugin submission or release. The repository's historical `v0.2.0` source release remains separate. No command in this document publishes source, creates a GitHub release, hosts an endpoint, submits a plugin, links a WhatsApp account, restarts a service, or sends a message.
 
-## Stable scope and explicit exclusions
+The current GitHub source-update scope and fresh checks are recorded in
+[GITHUB_UPDATE](GITHUB_UPDATE.md). Source publication is separate from successful
+live delivery and public plugin-directory acceptance.
 
-The existing Codex path passed status, selected-chat search/read, preparation
-without delivery and confirmed interactive text sending with exact own-message
-ID/text readback and one-time approval rejection. The cached client plugin was
-0.1.0 against runtime 0.2.0; a fresh 0.2.0 plugin installation and exact Codex
-app version were not recorded. This evidence is retained in
-[CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md), not upgraded into unperformed tests.
+## Local candidate verification
 
-Claude Code, Claude Desktop, Cursor, VS Code and generic local MCP integrations
-remain **experimental**. Their acceptance does not block this Codex-focused
-release. Fresh installation, reboot, reauthentication, uninstall, independent
-other-device receipt and real scheduled-send acceptance remain untested. Stable
-source publication is not universal compatibility, vendor endorsement or a
-business-critical delivery guarantee. Preserve confirmations, capability checks,
-duplicate controls, backup requirements and account/provider warnings.
-
-## Evaluation prerelease
-
-The historical `v0.2.0-rc.1` tag remains an evaluation source snapshot; its source
-package and plugin versions are `0.2.0`. It remains a GitHub prerelease and is
-not relabeled or overwritten by the separate stable `v0.2.0` tag.
-Source-only archives contain no dependencies, account state, QR codes or keys.
-The existing-client/runtime evidence and outstanding fresh-client/recovery
-checks are recorded in [CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md).
-
-## Confirmed publishing metadata
-
-Following the user's instruction to match the Stream Deck project: publisher
-and GitHub owner `ckundel2008`, repository target `ckundel2008/whatsapp-agent-mcp`,
-MIT for this project's own source. Repository and plugin-local LICENSE files
-are included; portable/Codex/Claude/package metadata and Claude marketplace owner
-are aligned. The local Git commit identity matches the other project and uses
-its GitHub noreply address. Future publication must still be deliberate.
-
-## Publication checks and remaining client work
-
-- Dependencies retain their own licenses. Review their actual use/redistribution
-  obligations; MIT metadata does not grant rights over OpenWA. See THIRD_PARTY_NOTICES.
-- Refresh the clean dependency audit before publication. The browser-component
-  override removes extract-zip rather than suppressing its advisories; preserve
-  lifecycle/browser-download restrictions and rerun both supported Node import/
-  process checks after changes. See [DEPENDENCIES](DEPENDENCIES.md).
-- Complete approved fresh Codex installation and recovery checks as additional
-  acceptance work. Record Claude Code/Desktop/Cursor/VS Code results before
-  changing their experimental status; do not invent a successful client test.
-- GitHub private vulnerability reporting is enabled. Verify it remains available
-  before future publication; never report private chat material in public issues.
-
-Release text is ready in [RELEASE_NOTES](RELEASE_NOTES.md); use the separate
-[CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md) record for real client results. A private
-publishing record is under ignored `.release-local/`; private files are not
-uploaded. Installed runtimes are not automatically updated by GitHub publication.
-
-## Local checks
+Run the smallest checks first from the repository root:
 
 ```sh
 node scripts/check-release.mjs
-node --test plugins/whatsapp-assistant/tests/*.test.mjs
-cd plugins/whatsapp-assistant/runtime
-PUPPETEER_SKIP_DOWNLOAD=1 pnpm install --prod --frozen-lockfile --ignore-scripts
-pnpm audit --prod
-node ../scripts/check-runtime.mjs
+node release/prepare-submission.mjs
 ```
 
-The normal checker validates candidate structure, version alignment, source
-syntax, local doc links and high-signal private-file/secret patterns. It is not
-an exhaustive secret/security audit. `node scripts/check-release.mjs --publish`
-also refuses publication without license/repository/publisher metadata and a
-passing dependency audit. The release scope and actual client evidence remain
-human-reviewed; the checker does not grant publication authority.
+Then run the project checks appropriate to the changed scope:
 
-Create a private reviewed candidate package from the repository root:
+```sh
+node --test plugins/whatsapp-assistant/tests/*.test.mjs
+npm run ui:test
+node scripts/check-release.mjs --publish
+```
+
+`--publish` is a stricter local metadata/dependency check; it does not publish anything and does not grant release authority. Use the normal source candidate package only when a source archive is needed:
 
 ```sh
 node scripts/package-candidate.mjs
 node scripts/verify-candidate.mjs
 ```
 
-It includes only Git's non-ignored source-file view (tracked + untracked), with
-SHA-256 inventory under ignored `.release-local/`. No .git, node_modules,
-session, local notes, logs, keys or private runtime state. It is not an approved
-stable release asset or evidence of live acceptance. The verifier checks the
-archive checksum, exact regular-file inventory and every archived content hash
-against the current source. Any subsequent source change requires rebuilding.
+The candidate archive is written under ignored `.release-local/`. It must never contain account state, QR codes, browser profiles, Unix-socket secrets, automation capabilities, real chats, logs, or private screenshots.
 
-## Future publication checklist
+Create a deterministic install ZIP for a local Codex plugin only when a local handoff needs it:
 
-1. Review actual contents, notices, exact targets and visibility (public for
-   discovery). Use a deliberate commit author, not inferred machine identity.
-2. Stage only reviewed paths; **never `git add .`**. Inspect staged content,
-   including CI, and ensure no real numbers, credentials or conversations.
-3. Run normal + strict release checks and full tests/import smoke tests. Record
-   exact client versions and remaining limitations; do not equate tests with login.
-4. Verify the exact existing GitHub repository/remote. Push only the reviewed
-   authorized commit. Source-candidate publication is separate from a stable
-   release and live acceptance; no automatic deployment.
-5. Run GitHub CI; enable private vulnerability reports and suitable branch
-   protection. Add agreed description and topics, not unsupported product claims.
-6. Verify owner/repo and pinned-ref installation commands against the published
-   marketplace source. Label other clients experimental until actually accepted.
-7. Tag the explicit reviewed version and publish source-only assets, checksums,
-   migration notes, exact Codex scope and all untested cases. Preserve historical
-   tags/releases; never equate a stable channel with universal live acceptance.
+```sh
+node release/prepare-submission.mjs --local-codex-zip "$PWD/.release-local/whatsapp-assistant-local.zip"
+```
 
-Suggested repository description:
-“Local WhatsApp MCP tools for Codex on macOS: scoped reads and confirmed replies.
-Stable community source release; Claude and other MCP clients experimental.”
+The ZIP contains the reviewed `plugins/whatsapp-assistant/` source tree, including offline `web/dist/index.html`, licenses, notices, executable launch scripts, and a SHA-256 manifest. It also contains the root `.agents/plugins/marketplace.json` and `LOCAL-CODEX-INSTALL.md`; after extraction, use `codex plugin marketplace add .` from the extracted root. It excludes `node_modules`, session state, credentials, logs, archives, and generated test results. It is not a public MCP submission, a hosted endpoint, or public-review acceptance.
 
-Suggested discovery topics: `whatsapp`, `mcp`, `mcp-server`, `codex`,
-`claude-code`, `agent-skills`, `local-first`, `privacy`, `macos`.
-The description/topics are applied on GitHub, not a promise of stars.
+## Public-directory gate
 
-An optional demo must use synthetic/test data and no QR/session material.
-Official OpenAI/Anthropic directories are separate submission processes; GitHub
-publication alone does not list this plugin there. Do not turn this local
-WhatsApp bridge into a public HTTP service just to enter a directory.
+Public submission is a separate activity governed by the current OpenAI plugin review flow. The local `stdio` MCP package and `127.0.0.1` fallback are not a public HTTPS MCP endpoint. Before someone creates a submission draft, satisfy every item in [PLUGIN_SUBMISSION](PLUGIN_SUBMISSION.md):
+
+1. A stable public HTTPS MCP endpoint; the private Secure MCP Tunnel is not a public-submission endpoint.
+2. Verified publisher identity and Apps Management submission permission in the same Platform organization.
+3. Real public website, support, privacy, and terms links that match the publisher identity.
+4. A synthetic-data reviewer demo usable without MFA, SMS, e-mail confirmation, private network access, or access to a personal WhatsApp account.
+5. Final remote tool scan, exact annotations, UI CSP, domain verification where requested, and five positive plus three negative reviewer cases.
+6. Passing final test evidence and resolved incoming-image acceptance, or an explicit public scope that excludes that flow.
+
+OpenAI reviews a submitted draft; approval does not automatically publish it. The publisher separately chooses whether to publish after approval. See the [official submission requirements](https://developers.openai.com/plugins/deploy/app-review) and [plugin packaging guide](https://developers.openai.com/plugins/build/plugins).
+
+## Release record
+
+For each candidate, record only observed facts:
+
+| Evidence | Record |
+| --- | --- |
+| Source revision and package hash | Exact commit and SHA-256 |
+| Local checks | Commands, versions, pass/fail result |
+| UI/browser checks | Host/browser, synthetic fixture, pass/fail result |
+| Live WhatsApp acceptance | Dedicated test account, exact authorized scope, observed result |
+| Reviewer environment | Public endpoint or local-MCP authorization, demo access, date checked |
+| Submission outcome | Draft/review/approved/published only after it occurs |
+
+Do not substitute a unit test, HTTP health check, local UI screenshot, or manifest scan for authenticated reviewer or WhatsApp delivery acceptance. The reported incoming-image defect has fresh local browser-panel evidence in [UI_ACCEPTANCE.md](UI_ACCEPTANCE.md); repeat it in the reviewer environment and keep broader unverified media/host claims open.
+
+## Historical source release
+
+`v0.2.0` was a Codex-focused community source release. Its limited existing Codex Desktop evidence is retained in [CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md). It does not validate the `0.3.0` UI, public directory submission, or current incoming-media behavior. Other MCP clients remain experimental unless their own fresh acceptance record says otherwise.

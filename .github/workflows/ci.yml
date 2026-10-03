@@ -9,6 +9,24 @@ concurrency:
   group: candidate-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: plugins/whatsapp-assistant/web
+      - run: npm run ui:build
+      - run: git diff --exit-code -- plugins/whatsapp-assistant/web/dist/index.html plugins/whatsapp-assistant/web/licenses
+      - run: npx playwright install --with-deps chromium
+        working-directory: plugins/whatsapp-assistant/web
+      - run: npm run ui:test
+        env:
+          WHATSAPP_TEST_BROWSER_CHANNEL: chromium
+      - run: npm audit --omit=dev
+        working-directory: plugins/whatsapp-assistant/web
   source:
     strategy:
       matrix:
@@ -25,6 +43,12 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: node scripts/check-release.mjs
       - run: node --test --test-timeout=30000 plugins/whatsapp-assistant/tests/*.test.mjs
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: online
+      - run: npm run online:test
+      - run: npm run online:demo
+      - run: npm audit --omit=dev
+        working-directory: online
   dependencies:
     strategy:
       matrix:

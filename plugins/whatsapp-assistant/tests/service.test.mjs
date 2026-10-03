@@ -390,7 +390,7 @@ test("Chrome hardening removes TLS, sandbox, and site-isolation bypasses", () =>
 });
 
 test("local OpenWA patch is fixed and contains no network or dynamic-code surface", () => {
-  assert.equal(LOCAL_OPENWA_PATCH_TAG, "local-bootstrap-v1");
+  assert.equal(LOCAL_OPENWA_PATCH_TAG, "local-bootstrap-v2");
   assert.equal(LOCAL_OPENWA_PATCHES.length, 1);
   const patch = LOCAL_OPENWA_PATCHES[0];
   assert.match(patch, /window\.moi/);

@@ -5,7 +5,7 @@
     {
       "name": "whatsapp-assistant",
       "source": "./plugins/whatsapp-assistant",
-      "description": "Local WhatsApp tools with scoped reads and separately confirmed text replies."
+      "description": "Local WhatsApp tools and graphical UI candidate with scoped reads and separately confirmed text replies; native UI support unverified."
     }
   ]
 }

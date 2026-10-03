@@ -1,5 +1,63 @@
 # Changelog
 
+## 0.3.0 — preview candidate, local source preparation (2026-10-02)
+
+- Fixed incoming images using WhatsApp's current user-initiated media resolver
+  and in-memory Blob cache. A real incoming image rendered in the installed
+  Codex browser panel; no private image was exported and no message was sent.
+- Fixed large Base64 validation and preserved media errors across history refresh.
+  Successful UI requests renew the active loopback session; inactivity still
+  expires it. Prepared local marketplace ZIP and structured submission draft.
+
+- Added user-selected outgoing image/file attachments, one per confirmed reply
+  up to 16 MiB, with raster preview, optional caption, bounded in-memory chunk
+  staging and exact-byte confirmation.
+- Added visible-chat profile pictures with initials fallback and incoming-media
+  metadata. Explicitly selected images, audio and video open in a bounded local
+  viewer; other files are download-only. Private media bytes never enter model
+  context automatically. Native file downloads require host SDK support.
+- Live local image/document preparation and Codex file chooser, image preview,
+  staging and exact-file confirmation verified without upload or send. The media
+  sender uses current WhatsApp modules and a generated complete MsgKey; real
+  media upload/delivery still requires a separately authorized test.
+- Added a bundled graphical UI candidate for status, chat search, unread filter,
+  bounded text history, older-page loading and separately confirmed replies.
+- Added explicit loopback-panel, support, terms, UI acceptance and future
+  submission documentation. View state remains in memory; no account setup or
+  daemon start is automatic.
+- Fresh local plugin installation, Codex browser-panel rendering, connection
+  recovery and a selected live text-history read verified. Synthetic sends only.
+- Resolve saved contact and profile names through current local WhatsApp getters,
+  including PN/LID aliases and group-message senders. Name search and recipient
+  confirmation share the same resolution; unavailable names retain an honest ID
+  fallback.
+- Patched indirect runtime dependencies, including the exact Axios 1.20.0
+  override for twelve newly reported advisories; production lockfile audit is clean.
+- Native host rendering, recovery, real UI sends and public
+  directory publication remain unverified. Public submission still requires a
+  public HTTPS MCP endpoint, a supplied test account/walkthrough and OpenAI
+  review.
+- Added the private personal-Dot operator path through the official Secure MCP
+  Tunnel (`online/private-*.mjs`), linked from [the operator guide](docs/PRIVATE_DOT_CONNECTION.md)
+  and [online/README](online/README.md). It provides three read tools by default
+  and two opt-in text-write tools, keeps all-chat access account-bound, and limits
+  reads to 30 days.
+- Text writes require a new separate confirmation after preparation. A durable
+  ledger blocks duplicate sends after both `DELIVERY_UNKNOWN` and successful
+  outcomes; safe pre-dispatch errors distinguish `CONFIRMATION_REQUIRED`,
+  `APPROVAL_INVALID`, `ACCOUNT_CHANGED`, `CONNECTION_UNAVAILABLE` and
+  `INVALID_ARGUMENTS`.
+- The private ChatGPT path was checked for status, search, reading and
+  prepare-only. A user-reported real send failed for an unknown cause and was
+  not repeated; sending and delivery remain unverified. Native Codex MCP-App
+  rendering is unverified, while the browser panel was live-checked.
+- This is a preview/candidate source update prepared locally. No public HTTPS
+  deployment or OpenAI submission was made; the private tunnel is not a public
+  submission substitute.
+- Fresh local checks pass 149 unit tests, 83 online tests and all 16 synthetic
+  Chrome browser cases. The UI bundle builds without external CDN resources;
+  actual native host rendering and real delivery remain separate acceptance steps.
+
 ## 0.2.0 — 2026-09-16
 
 - Stable Codex-focused community source release. The existing Codex Desktop path

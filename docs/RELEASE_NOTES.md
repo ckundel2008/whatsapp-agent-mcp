@@ -1,59 +1,45 @@
-# 0.2.0 — Codex-focused community release
+# Release notes
 
-**Stable source release `v0.2.0`, scoped to Codex.** Source is published at
-[ckundel2008/whatsapp-agent-mcp](https://github.com/ckundel2008/whatsapp-agent-mcp),
-with MIT for own source. The existing Codex Desktop interactive path was
-live-tested with runtime 0.2.0. Claude and other clients are experimental;
-stable is not universal acceptance or vendor-supported delivery. See
-[the release scope](RELEASING.md#stable-scope-and-explicit-exclusions).
+## 0.3.0 — preview candidate, local publication preparation (2026-10-02)
 
-WhatsApp Assistant brings scoped local WhatsApp tools to Codex, Claude Code and
-other MCP clients. The bridge uses a private Unix socket, not a public HTTP
-service. Selected tool results still reach the AI client and possibly its model
-provider; “local” does not mean that selected chat data stays off the AI host.
+This candidate adds a native MCP App UI path with an explicit local loopback fallback for selected-chat search, bounded history, and separately confirmed replies. It has six model-facing tools and 13 UI-only actions. The bridge stays local to one macOS user session and has no cloud relay or public MCP endpoint.
 
-## Highlights
+The candidate now includes an offline public-submission draft: reviewer listing text, safety/privacy boundaries, five positive and three negative test cases, and an offline bundle preflight. It does **not** submit to OpenAI, host a public server, create a directory listing, or imply approval.
 
-- Codex and Claude plugin manifests, shared English agent instructions with
-  user-language replies, portable plugin metadata and MCP configuration helpers
-  for experimental Claude Desktop, Cursor and VS Code integrations.
-- Six narrow tools: status, chat listing, bounded reading, prepare reply,
-  confirmed prepared send and constrained authorized scheduled send.
-- Metadata-first chat listing without reading previews by default; text-only
-  results and fixed browser-side projections.
-- Account-bound, exact-text one-time reply approvals. Scheduled rules require
-  separate once-issued secret capabilities, plus recipient/account/rate/expiry
-  controls and durable idempotency.
-- Complete current MsgKey serialization prevents a false unconfirmed result
-  when the web client exposes its message ID through `toString()` only. A new
-  dedicated-chat control verified send confirmation and exact ID/text readback.
-- JSON-RPC error/notification hardening, reauthentication backup/recovery and
-  synthetic regression tests. CI checks supported Node versions and frozen
-  dependencies; reviewed release assets contain source only with SHA-256 inventory.
+A deterministic local Codex installation ZIP can be built under `.release-local/`. It contains the reviewed plugin source, root marketplace catalog, offline UI bundle, licenses, notices, executable launchers, and a SHA-256 inventory. It is a local distribution artifact, not a public MCP upload or review result.
 
-## Migration
+The candidate also contains a separate private personal-Dot path through the
+official Secure MCP Tunnel. The online operator scripts (`online/private-*.mjs`)
+expose three read tools by default and two opt-in text-write tools. All-chat
+access is explicitly account-bound, reads are limited to 30 days, and every
+write requires preparation followed by a new separate confirmation. The durable
+send ledger prevents a second send after both an unknown result and a successful
+result. Safe errors include `CONFIRMATION_REQUIRED`, `APPROVAL_INVALID`,
+`ACCOUNT_CHANGED`, `CONNECTION_UNAVAILABLE` and `INVALID_ARGUMENTS`. See the
+[private Dot operator guide](PRIVATE_DOT_CONNECTION.md) and
+[online README](../online/README.md).
 
-Existing scheduled rules without capabilities are intentionally denied for new
-sends. Revoke and explicitly re-authorize each required rule, then update its
-protected saved task with the newly issued capability. See
-[MIGRATION](../plugins/whatsapp-assistant/docs/MIGRATION.md).
+The actual private ChatGPT path was checked for status, chat search, reading and
+prepare-only. A real send reported by the user failed for an unknown cause; it
+was not repeated, so sending and delivery remain unverified. Native Codex MCP-App
+rendering is unverified, while the Codex browser panel was live-checked.
 
-## Honest limitations
+On 2026-10-02, 149 local unit tests, 83 online tests and all 16 synthetic browser
+cases passed. The bundled UI was rebuilt successfully. Dependency and source
+archive checks are recorded separately in the GitHub handoff. No personal
+chat names, message content, account identifiers, workspace identifiers, tunnel
+IDs, private URLs or session evidence are part of this source update.
 
-macOS and installed Google Chrome are the supported runtime target. An authorized
-default-runtime upgrade/restart and existing Codex-tool path passed the limited
-checks in [CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md). Fresh client installations,
-reboot/reauthentication/uninstall and independent remote-device receipt remain
-pending. The tested existing client used cached plugin 0.1.0 with runtime 0.2.0;
-fresh 0.2.0 plugin installation and exact desktop app version were not recorded.
-Claude Code/Desktop, Cursor, VS Code and generic MCP clients remain experimental.
-Real scheduled sends also remain untested. Protocol simulations do not prove a
-fresh authenticated client installation.
-Windows/Linux runtime support, public/cloud HTTP access, media and new-contact
-sends are not included. This is an unofficial project, not endorsed by WhatsApp,
-Meta, OpenAI or Anthropic; upstream web changes can break the bridge.
+### Known limits
 
-The host cannot prove human confirmation or scheduled origin. A bearer capability
-holder can spend its rule's authority within the limits. Same-user local malware
-and AI host/provider context remain trust boundaries. See
-[PRIVACY](../plugins/whatsapp-assistant/docs/PRIVACY.md) and [SECURITY](../SECURITY.md).
+- A public MCP submission remains blocked without a public HTTPS endpoint, verified publisher identity, public policy links, and synthetic reviewer access. The private Secure MCP Tunnel does not meet this requirement.
+- The incoming-image defect is fixed and one real received image rendered in the installed Codex browser panel. Actual native Codex-host rendering and live audio/video/document reads remain unverified; reviewer-environment evidence is still required.
+- The native host UI and loopback fallback do not establish public review, fresh-client recovery, or real media-delivery acceptance.
+- This remains a preview/candidate source update prepared locally. No public HTTPS deployment or OpenAI submission was made; the private Secure MCP Tunnel is not a public submission substitute.
+- This is an unofficial OpenWA/Chrome bridge, not a WhatsApp/Meta/OpenAI integration. Selected model-tool text reaches the chosen AI client/provider.
+
+See [submission preparation](PLUGIN_SUBMISSION.md) and the [release process](RELEASING.md) for the exact blockers and evidence boundary.
+
+## 0.2.0 — Codex-focused community source release
+
+`v0.2.0` was published as a scoped source release for the existing Codex Desktop interactive path. It did not establish fresh-client installation, public plugin directory availability, universal MCP-client support, real scheduled sends, or incoming-media support. The historical evidence remains in [CLIENT_ACCEPTANCE](CLIENT_ACCEPTANCE.md).

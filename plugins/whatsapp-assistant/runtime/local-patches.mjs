@@ -1,4 +1,6 @@
-export const LOCAL_OPENWA_PATCH_TAG = "local-bootstrap-v1";
+import { resolveAssistantName } from "./display-names.mjs";
+
+export const LOCAL_OPENWA_PATCH_TAG = "local-bootstrap-v2";
 
 export const LOCAL_OPENWA_PATCHES = Object.freeze([
   `(() => {
@@ -21,6 +23,7 @@ export const LOCAL_OPENWA_PATCHES = Object.freeze([
     };
     window.o = () => "";
     window.WAPI = window.WAPI || {};
+    window.WAPI.resolveAssistantName = ${resolveAssistantName.toString()};
     window.WAPI.launchMetrics = () => {
       const chats = window.Store?.Chat;
       const contacts = window.Store?.Contact;

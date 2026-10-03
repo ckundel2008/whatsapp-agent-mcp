@@ -5,6 +5,16 @@ node_modules, WhatsApp sessions, Chrome binaries or OpenWA source. Its own
 source is under [MIT](LICENSE); separately installed dependencies retain their
 own licenses and are not relicensed by this plugin's manifest or LICENSE.
 
+The fixed media projections in `runtime/service.mjs` and `runtime/media-reads.mjs`
+adapt current media and profile API
+patterns from [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js),
+`src/util/Injected/Utils.js`, `src/structures/Message.js` and `src/Client.js`,
+copyright 2019 Pedro S Lopez, Apache License 2.0.
+Changes restrict it to user-selected local bytes, existing chats, bound account
+identity and exact generated-message confirmation. See its bundled
+[license](runtime/licenses/whatsapp-web-js.txt). No whatsapp-web.js package or
+injection bundle is included; the adapted section retains Apache-2.0 terms.
+
 Direct runtime dependency: `@open-wa/wa-automate` 4.76.0, maintained by OpenWA.
 Its package.json reports `H-DNH V1.0`, while its included LICENSE.md is titled
 **Hippocratic + Do Not Harm Version 1.1**, copyright 2020 Mohammed Shah.

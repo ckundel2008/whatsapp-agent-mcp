@@ -6,17 +6,65 @@ chats, summarize recent text and prepare replies that require a separate
 confirmation before sending. The bridge uses a private Unix socket, not a
 local network port.
 
-**Codex-focused community release 0.2.0** | macOS | text only
+**0.3.0 preview candidate (local source preparation, 2026-10-02)** | macOS |
+native UI support unverified
 
-The existing Codex Desktop path was live-tested with runtime 0.2.0 for status,
-selected-chat search/read and separately confirmed interactive text sending.
+The historical Codex Desktop path was live-tested with runtime 0.2.0 for status,
+selected-chat search/read and separately confirmed interactive text sending. The
+0.3.0 candidate adds a bundled graphical UI for bounded text history and confirmed
+replies, including a user-selected image or file;
+fresh local plugin installation and Codex browser-panel rendering are verified;
+native host rendering and public listing are not yet verified.
 Claude Code, Claude Desktop, Cursor, VS Code and other MCP clients are
 **experimental**. Fresh plugin installation, recovery and real scheduled-send
 acceptance are not claimed. See [the exact evidence](docs/CLIENT_ACCEPTANCE.md).
 
 [![Candidate checks](https://github.com/ckundel2008/whatsapp-agent-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ckundel2008/whatsapp-agent-mcp/actions/workflows/ci.yml)
 
-[Deutsch](docs/README.de.md) · [Installation](plugins/whatsapp-assistant/README.md) · [Compatibility](docs/COMPATIBILITY.md) · [FAQ](docs/FAQ.md) · [Privacy](plugins/whatsapp-assistant/docs/PRIVACY.md) · [Contributing](CONTRIBUTING.md)
+[Deutsch](docs/README.de.md) · [Installation](plugins/whatsapp-assistant/README.md) · [Compatibility](docs/COMPATIBILITY.md) · [FAQ](docs/FAQ.md) · [Privacy](plugins/whatsapp-assistant/docs/PRIVACY.md) · [Support](plugins/whatsapp-assistant/docs/SUPPORT.md) · [Contributing](CONTRIBUTING.md)
+
+The separate [online development pilot](online/README.md) starts the
+[Dots roadmap](docs/ONLINE_DOTS_PLAN.md). It provides a tested read-only HTTP MCP
+gateway and outbound device bridge, with explicit user/chat/account boundaries.
+It is not deployed, publicly installable, or live-verified with Dots. The local
+plugin and its six existing model tools remain unchanged.
+
+For a personal Dot, the repository also contains an operator path through the
+official [Secure MCP Tunnel](docs/PRIVATE_DOT_CONNECTION.md). The private
+`online/private-*.mjs` path exposes three read tools by default; two text-write
+tools are opt-in and require a separately confirmed preparation. All-chat access
+is explicitly bound to the selected WhatsApp account, and reads stay within the
+last 30 days. A durable ledger blocks repeated sends after both unknown and
+successful outcomes. `CONFIRMATION_REQUIRED`, `APPROVAL_INVALID`,
+`ACCOUNT_CHANGED`, `CONNECTION_UNAVAILABLE` and `INVALID_ARGUMENTS` are returned
+as safe, distinguishable errors. This tunnel is private operator infrastructure,
+not a public HTTPS deployment or an OpenAI directory submission.
+
+## Graphical UI candidate
+
+The candidate includes a React UI for connection status, chat search, an unread
+filter, bounded text history, older-page loading and a two-step reply flow. Attach
+one image or file (up to 16 MiB) to a reply, with optional caption. Raster images
+show a preview; other files show their name and size. File bytes stay in local
+memory until the explicit send action and are not handed to the model. It
+resolves available chat and sender names, shows profile pictures with initials as
+fallback, and lets the user explicitly open received images and other bounded
+media. Text and file attachments are included only in the separately confirmed
+reply flow. It uses the same local MCP action layer and keeps view state in memory;
+it does not read session files or expose the Unix socket to the browser. Native
+Codex UI
+support is **UNVERIFIED**. A loopback browser panel can be started explicitly:
+
+```sh
+./plugins/whatsapp-assistant/scripts/run-ui.sh
+```
+
+Then open the printed loopback URL (by default
+`http://127.0.0.1:8765/`) in the browser panel.
+
+The UI does not start a daemon or link an account automatically. See the
+[UI acceptance record](docs/UI_ACCEPTANCE.md), [support](plugins/whatsapp-assistant/docs/SUPPORT.md)
+and [terms](plugins/whatsapp-assistant/docs/TERMS.md).
 
 Find the chat you need, summarize recent messages, and draft a reply. Interactive
 replies require the exact recipient and text to be shown first, followed by a
@@ -24,7 +72,7 @@ new explicit confirmation. Preauthorized scheduled tasks use separate,
 recipient-bound secret capabilities and durable duplicate prevention.
 
 - Scoped search and paginated text history, limited to the selected chat's last 30 days.
-- No new numbers, media downloads, bulk messaging, or incoming-triggered auto-replies.
+- Model-facing tools remain text-only; the graphical UI opens selected media explicitly. No new numbers, bulk messaging, or incoming-triggered auto-replies.
 - Local Unix socket, private session storage, metadata-only logs, no plugin cloud relay.
 - Shared agent skill plus an MCP safety prompt for clients without plugin skills.
 - Pinned OpenWA runtime; remote runtime patches and insecure Chrome flags disabled.
@@ -87,11 +135,17 @@ client settings. Merge it into the appropriate client configuration. Load the
 `whatsapp-safety` MCP prompt or the bundled skill before using the tools.
 
 Source repository: [ckundel2008/whatsapp-agent-mcp](https://github.com/ckundel2008/whatsapp-agent-mcp).
-Use the pinned `v0.2.0` source release for reproducible registration:
+Use this local 0.3.0 candidate checkout for UI evaluation. Public directory
+publication is not complete and requires a public HTTPS endpoint and OpenAI review.
+
+Evaluate the candidate from the local checkout with:
 
 ```sh
-codex plugin marketplace add ckundel2008/whatsapp-agent-mcp --ref v0.2.0
+codex plugin marketplace add .
+codex plugin add whatsapp-assistant@whatsapp-assistant-community
 ```
+
+The following remote commands apply after the updated source is published:
 
 ```text
 /plugin marketplace add ckundel2008/whatsapp-agent-mcp
@@ -119,10 +173,15 @@ This is a community project, not an official WhatsApp/Meta, OpenAI, or Anthropic
 integration. OpenWA/WhatsApp Web can change without notice, and unofficial
 automation can lead to account restrictions. Avoid business-critical reliance.
 
-The MCP runtime and safety regressions are tested locally. The stable community
-release is Codex-focused, based on the existing client path's live interactive
-checks. That client's cached plugin was 0.1.0 against runtime 0.2.0; a fresh
-0.2.0 plugin installation was not tested. Other client packaging is experimental.
+The MCP runtime and safety regressions are tested locally. The 0.3.0 source
+update is prepared locally as a preview candidate; no public HTTPS deployment or
+OpenAI submission has been made. Fresh plugin
+installation and live text-history rendering in the Codex browser panel passed.
+The actual private ChatGPT path has been checked for status, search, reading and
+send preparation only. A user-reported real send failed for an unknown cause and
+was not repeated, so sending and delivery remain unverified. Native Codex MCP-App
+rendering is also unverified; see the [UI acceptance record](docs/UI_ACCEPTANCE.md).
+Other client packaging is experimental.
 Reboot, reauthentication, uninstall, real scheduled-send acceptance and
 independent receipt on another device remain untested. Windows, Linux runtime
 installation, remote/cloud-only clients, and mobile clients are unsupported.

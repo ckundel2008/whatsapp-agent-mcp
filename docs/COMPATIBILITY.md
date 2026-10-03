@@ -81,6 +81,8 @@ recovery and deployment acceptance remain the operator's responsibility.
 7. Record client/runtime versions and only the achieved acceptance level.
 
 Unsupported: Windows/Linux runtime installation, browser-only/cloud-only
-clients, mobile, public HTTP endpoints, remote relay, media, new-number sends.
+clients, mobile, public HTTP endpoints, remote relay, incoming-media downloads,
+new-number sends. The 0.3.0 graphical candidate supports user-selected outgoing
+attachments; real media delivery and actual native-host support remain unverified.
 Unit tests on Linux do not establish Linux runtime support. Public GitHub
 distribution is distinct from submission to any official plugin directory.

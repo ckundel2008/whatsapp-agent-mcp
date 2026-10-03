@@ -17,6 +17,16 @@ runtime/node_modules archive without reviewing notices and redistribution
 conditions. The project's own source is licensed under [MIT](LICENSE); that
 does not relicense OpenWA or any separately downloaded dependency.
 
+The fixed browser media projections in `runtime/service.mjs` and
+`runtime/media-reads.mjs` adapt media and profile API
+patterns from [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js),
+`src/util/Injected/Utils.js`, `src/structures/Message.js` and `src/Client.js`,
+copyright 2019 Pedro S Lopez, Apache License 2.0.
+The adapted section uses fixed local inputs, existing-chat/account checks and
+exact generated-message confirmation. Its original license is bundled at
+[whatsapp-web-js.txt](plugins/whatsapp-assistant/runtime/licenses/whatsapp-web-js.txt).
+No whatsapp-web.js dependency or injection bundle is included.
+
 WhatsApp/Meta, Codex/OpenAI, Claude/Anthropic, Cursor and VS Code names identify
 compatibility targets only. No affiliation, endorsement or official marketplace
 listing is claimed. No third-party brand artwork is included.

@@ -37,6 +37,9 @@ export function checkRelease({ publish = false } = {}) {
   assert.equal(repository.author, portable.author.name);
   assert.equal(runtime.author, portable.author.name);
   assert.equal(codex.interface.developerName, portable.author.name);
+  assert.deepEqual(portable.extensions?.["com.openai"]?.interface, codex.interface);
+  assert.ok(codex.interface.displayName.length <= 30);
+  assert.ok(codex.interface.shortDescription.length <= 30);
   assert.equal(readFileSync(path.join(plugin, "LICENSE"), "utf8"), readFileSync(path.join(repoRoot, "LICENSE"), "utf8"));
   assert.equal(runtime.dependencies["@open-wa/wa-automate"], "4.76.0");
   assert.equal(runtime.packageManager, "pnpm@11.19.0");
@@ -65,6 +68,12 @@ export function checkRelease({ publish = false } = {}) {
     assert.ok(!/(^|\/)(node_modules|session|\.release-local|reauth-backup\.[^/]+)(\/|$)|(?:^|\/)(socket\.secret|automation\.hmac\.key|automation-policy\.json|automation-deliveries\.json|\.authenticated|\.setup-complete)$|\.(?:key|pem|sock|jsonl|tgz|zip)$/.test(file), `Private/generated publication file: ${file}`);
     const full = path.join(repoRoot, file);
     assert.equal(lstatSync(full).isSymbolicLink(), false, `Publication symlink: ${file}`);
+    const extension = path.extname(file).toLowerCase();
+    if (extension === ".png") {
+      const signature = readFileSync(full).subarray(0, 8);
+      assert.deepEqual([...signature], [137, 80, 78, 71, 13, 10, 26, 10], `Invalid PNG asset: ${file}`);
+      continue;
+    }
     const content = readFileSync(full, "utf8");
     assert.ok(!/\/Users\/[^/ \n]+\/(?:Documents|\.codex|plugins)\//.test(content), `Personal machine path: ${file}`);
     assert.ok(!/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\bgh[pousr]_[A-Za-z0-9]{30,}|\bgithub_pat_[A-Za-z0-9_]{40,}|\bsk-(?:proj-)?[A-Za-z0-9_-]{32,}/.test(content), `Possible secret: ${file}`);
@@ -82,6 +91,9 @@ export function checkRelease({ publish = false } = {}) {
       if (file.endsWith(".mjs")) execFileSync(process.execPath, ["--check", path.join(repoRoot, file)], { stdio: "pipe" });
       if (file.endsWith(".sh")) execFileSync("/bin/sh", ["-n", path.join(repoRoot, file)], { stdio: "pipe" });
     }
+  }
+  for (const file of files.filter((name) => name.startsWith("online/") && name.endsWith(".mjs"))) {
+    execFileSync(process.execPath, ["--check", path.join(repoRoot, file)], { stdio: "pipe" });
   }
   if (publish) {
     assert.ok(existsSync(path.join(repoRoot, "LICENSE")), "Publication blocked: choose and add the project's LICENSE first.");
