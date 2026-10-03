@@ -16,7 +16,8 @@ the source candidate. It is not a GitHub publication or an OpenAI approval.
 - Offline local installation package, bilingual operator instructions,
   third-party notices and public-submission preparation materials.
 - Exact Axios 1.20.0 override and lockfile update address twelve newly reported
-  advisories without changing the running installation.
+  advisories without changing the running installation. The fresh 2026-10-03
+  runtime audit has two additional unresolved advisories; see below.
 
 ## Verification
 
@@ -26,11 +27,23 @@ the source candidate. It is not a GitHub publication or an OpenAI approval.
 | Online suite | 83/83 passed |
 | Synthetic browser suite | 16/16 passed, macOS / Chrome 154.0.8037.93 |
 | Bundled UI build | Passed, no CDN runtime resources |
-| Production dependency audits | Runtime, web and online: no known vulnerabilities |
+| Production dependency audits | Clean on 2026-10-02; fresh runtime audit on 2026-10-03 reports two high advisories |
 | Frozen runtime installation | Passed in a temporary directory, lifecycle scripts disabled |
 | Runtime import/API checks | Passed, synthetic Node child only; Axios 1.20.0 CommonJS caller verified |
 | Strict release metadata/source check | Passed |
 | Public submission preflight | Correctly blocked on public HTTPS endpoint, reviewer access, identity and final review evidence |
+
+### Publication recheck on 2026-10-03
+
+The strict release check now fails on
+[http-cache-semantics](https://github.com/advisories/GHSA-ch52-4w7c-c8xp)
+and [braces](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm). The registry
+still provides only 4.2.0 and 3.0.3 respectively; the upstream advisories list
+no patched versions. The versions suggested by the audit (4.2.1 and 3.0.4)
+are not available for installation. No dependency override, audit exception or
+running installation was changed. This source update is suitable for a draft
+PR; a distributable release remains blocked until the findings are resolved
+and the strict check passes.
 
 Local checks used Node.js 24.20.0. GitHub CI is configured for Node 22/Linux and
 Node 24/macOS, plus exact runtime dependency-floor checks; no hosted CI result

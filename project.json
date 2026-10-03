@@ -61,7 +61,7 @@
   ],
   "evidence": {
     "reviewedAt": "2026-10-03",
-    "automatedTests": "149 local Node tests, 83 online tests and 16 synthetic Chrome browser cases passed; native SDK exercised with a synthetic host, browser adapter with synthetic data. Attachment staging, account/digest binding, one-time approval, durable send reservations and uncertain outcomes covered. Production lockfile audits clean",
+    "automatedTests": "149 local Node tests, 83 online tests and 16 synthetic Chrome browser cases passed on 2026-10-02; native SDK exercised with a synthetic host, browser adapter with synthetic data. Attachment staging, account/digest binding, one-time approval, durable send reservations and uncertain outcomes covered. Audits were clean on 2026-10-02; the 2026-10-03 strict release recheck reports two high runtime advisories without published fixes and blocks a distributable release",
     "liveAcceptance": "0.3.0 fresh local plugin installation and Codex browser-panel rendering verified. Selected text read, names and one incoming image checked without exporting private content. Synthetic PNG/document preparation and exact-file confirmation verified without upload/send. Private ChatGPT tunnel status/search/read/preparation verified. On 2026-10-03 the operator confirmed successful real sending in personal use; no additional agent send or independent recipient receipt check. Native Codex MCP-App rendering, media delivery and reboot recovery remain unverified. Historical 0.2.0 evidence remains in CLIENT_ACCEPTANCE.md",
     "sourceLinks": [
       "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/README.md",

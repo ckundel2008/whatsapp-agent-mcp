@@ -32,7 +32,10 @@
   confirmation share the same resolution; unavailable names retain an honest ID
   fallback.
 - Patched indirect runtime dependencies, including the exact Axios 1.20.0
-  override for twelve newly reported advisories; production lockfile audit is clean.
+  override for twelve newly reported advisories; production lockfile audit was
+  clean on 2026-10-02. The 2026-10-03 recheck reports two new high advisories
+  in http-cache-semantics and braces with no published patched versions;
+  distributable release remains blocked, with no audit exception.
 - Native host rendering, recovery, real UI sends and public
   directory publication remain unverified. Public submission still requires a
   public HTTPS MCP endpoint, a supplied test account/walkthrough and OpenAI
