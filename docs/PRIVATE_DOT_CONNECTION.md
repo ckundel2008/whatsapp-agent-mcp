@@ -187,8 +187,9 @@ Automationen und Gruppenverwaltung gehören weiterhin nicht zum Dot-Zugang.
 
 ## Aktueller Nachweisstand
 
-Am 3. Oktober 2026 bestätigt der Nutzer, dass der Versand im persönlichen
-Betrieb funktioniert. Dies ist eine Nutzerrückmeldung aus dem Praxistest;
+Am 3. Oktober 2026 bestätigt der Nutzer, dass der Textversand im persönlichen
+Betrieb funktioniert, ausdrücklich auch über seinen Dot nach dem Runtime-Update.
+Dies ist eine Nutzerrückmeldung aus dem Praxistest;
 der Agent hat keine zusätzliche Nachricht gesendet oder den Empfänger-Verlauf
 geprüft. Empfänger, Text und Freigaben bleiben außerhalb der Projektunterlagen.
 Der unten dokumentierte frühere Fehlerstand bleibt als Diagnosehistorie erhalten.

@@ -76,8 +76,9 @@ The managed daemon is now CONNECTED to the same account, and complete installed
 fork file inventories match the reviewed source. The private MCP status route
 reports connected=true, read_only=false and send_requires_confirmation=true;
 the existing tunnel and its child remained running. This status check did not
-read chats or send a message. Native host rendering, media delivery and an
-end-to-end phone-Dot action remain separate acceptance boundaries.
+read chats or send a message. The operator subsequently confirmed real text
+sending through the personal Dot; this is separate user-reported acceptance.
+Native host rendering and media delivery remain unverified.
 
 ## Acceptance boundaries
 
@@ -86,8 +87,9 @@ evidence. The private ChatGPT tunnel path has live status, search, selected-text
 read and preparation evidence. No private content or account material is
 included in the source package.
 
-On 2026-10-03, the operator confirmed that real sending now works in personal
-use. This is user-reported live acceptance; the agent did not send another
+On 2026-10-03, the operator confirmed that real text sending now works in personal
+use, including through the personal Dot after the runtime update. This is
+user-reported live acceptance; the agent did not send another
 message or independently inspect recipient-side delivery. The earlier failed
 attempt was not automatically retried and its exact cause remains undetermined.
 Real media delivery, native Codex MCP-App rendering, reboot recovery, phone-Dot

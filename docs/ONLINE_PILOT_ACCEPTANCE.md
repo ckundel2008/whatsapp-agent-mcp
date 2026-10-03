@@ -1,6 +1,6 @@
 # Online-Pilot: Nachweise und offene Abnahme
 
-Stand: 3. Oktober 2026; automatisierte Prüfungen vom 2. Oktober. Gilt für die separate Entwicklungsversion in `online/`,
+Stand: 3. Oktober 2026; automatisierte Prüfungen vom 3. Oktober. Gilt für die separate Entwicklungsversion in `online/`,
 nicht für ein öffentlich veröffentlichtes Plugin. Keine Bereitstellung oder
 Verzeichnisaufnahme durchgeführt.
 
@@ -9,7 +9,7 @@ Verzeichnisaufnahme durchgeführt.
 | Prüfung | Ergebnis | Geltungsbereich |
 | --- | --- | --- |
 | Online-Tests | 83/83 bestanden | Signierte synthetische Token, HTTP/WebSocket, privater stdio-Zugang, all-chat Suche/Pagination, bestätigter Textversand, persistente Sperre über Neustart/konkurrierende Instanzen, verlorene Erfolgsantwort, bestätigte Operator-Aufhebung und unterscheidbare Vorprüfungsfehler; kein echter Versand |
-| Bestehende lokale Plugin-Tests | 149/149 bestanden | Bestehende lokale Oberfläche, sechs Modellwerkzeuge und Runtime-Grenzen |
+| Bestehende lokale Plugin-Tests | 157/157 bestanden | Bestehende lokale Oberfläche, sechs Modellwerkzeuge, Runtime-Grenzen und Chrome-Startkorrektur |
 | Release-Quellprüfung | Bestanden | Lokaler Kandidat; keine öffentliche Freigabe |
 | Audit der Online-Produktionsabhängigkeiten | 0 gemeldete Schwachstellen | Gepinnte Versionen von jose und ws zum Prüfzeitpunkt |
 | `npm run online:demo` | Bestanden | Synthetischer Chat sichtbar, Textverlauf gelesen, fremder Chat ausgefiltert und Versand abgewiesen |
@@ -28,10 +28,12 @@ Verzeichnisaufnahme durchgeführt.
 | Echter ChatGPT-Leseaufruf über privaten Tunnel | Bestanden | Testchat „WhatsApp Verbindung prüfen“ meldet CONNECTED, sieben Suchtreffer, genau eine Textnachricht gelesen und vollständiges 30-Tage-Fenster; keine Nachricht vorbereitet oder versendet |
 | Diagnose des gemeldeten Versandfehlers | Ursache weiterhin unbestimmt | Privates Ledger ohne Reservierungen; echter lokaler Vorbereitungstest erfolgreich, null Send-Dispatches; sichere Vorprüfungsfehler jetzt als MCP-Toolergebnisse statt pauschalem RPC-Fehler; Runtime wieder healthy/ready |
 | Echter ChatGPT-Vorbereitungstest über privaten Tunnel | Bestanden | Testchat „WhatsApp Verbindung prüfen“ bestätigt Vorbereitung erfolgreich, kein Fehlercode; synthetischer Text in einem bestehenden Chat nur vorbereitet, Sendeaufruf ausdrücklich verboten, Ledger unverändert leer |
-| Echter Versand im persönlichen Betrieb | Am 3. Oktober vom Nutzer bestätigt | Nutzer meldet erfolgreichen Versand. Kein zusätzlicher Sendeaufruf oder unabhängiger Zustellungscheck durch den Agenten; kein Empfänger oder Nachrichtentext dokumentiert |
+| Echter Textversand im persönlichen Betrieb und über den Dot | Am 3. Oktober vom Nutzer bestätigt | Nutzer meldet erfolgreichen Textversand, ausdrücklich auch über den persönlichen Dot nach dem Runtime-Update. Kein zusätzlicher Sendeaufruf oder unabhängiger Zustellungscheck durch den Agenten; kein Empfänger oder Nachrichtentext dokumentiert |
 
 Ausgeführt auf Node.js 24.20.0 auf diesem Mac. CI-Prüfung für Node 22/24 ist
-ergänzt, aber noch nicht bei GitHub ausgeführt. Die Online-Demo verwendet nur
+auf dem reparierten Code einschließlich Chrome-Startkorrektur erfolgreich
+[bei GitHub ausgeführt](https://github.com/ckundel2008/whatsapp-agent-mcp/actions/runs/37098211435).
+Die Online-Demo verwendet nur
 kurzlebige lokale Schlüssel im Arbeitsspeicher und bewirkt keine externe
 OAuth-Verbindung. Die Statusprobe beendet ihre temporären Adapter danach.
 
@@ -72,7 +74,8 @@ diesen privaten Tunnel. [Privater Dot-Zugang](PRIVATE_DOT_CONNECTION.md)
   Der neue Leseaufruf und eine Zusammenfassung im Handy-Dot bleiben offen;
   dafür ist keine allgemeine Rechnerfreigabe Bestandteil dieses Tunnelwegs.
 - **INDEPENDENT_DELIVERY_NOT_RUN:** Der Nutzer bestätigt am 3. Oktober
-  erfolgreichen Versand im persönlichen Betrieb. Ein zusätzlicher unabhängiger
+  erfolgreichen Textversand im persönlichen Betrieb und über den persönlichen
+  Dot nach dem Runtime-Update. Ein zusätzlicher unabhängiger
   Versand-/Zustellungscheck wurde nicht durchgeführt. Der frühere Fehlversuch
   wurde nicht automatisch wiederholt; seine genaue Fehlerursache bleibt offen.
 - **REMOTE_OAUTH_LOGIN_NOT_RUN:** Etablierter Anbieter mit Discovery, PKCE,
