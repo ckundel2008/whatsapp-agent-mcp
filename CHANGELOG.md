@@ -48,8 +48,9 @@
   `APPROVAL_INVALID`, `ACCOUNT_CHANGED`, `CONNECTION_UNAVAILABLE` and
   `INVALID_ARGUMENTS`.
 - The private ChatGPT path was checked for status, search, reading and
-  prepare-only. A user-reported real send failed for an unknown cause and was
-  not repeated; sending and delivery remain unverified. Native Codex MCP-App
+  prepare-only. On 2026-10-03 the operator confirmed successful real sending
+  in personal use; no additional agent send or independent receipt check was
+  performed. The earlier failed attempt was not automatically retried. Native Codex MCP-App
   rendering is unverified, while the browser panel was live-checked.
 - This is a preview/candidate source update prepared locally. No public HTTPS
   deployment or OpenAI submission was made; the private tunnel is not a public

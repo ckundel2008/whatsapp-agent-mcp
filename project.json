@@ -12,7 +12,7 @@
   "maturity": "0.3.0-local-ui-candidate",
   "release": {
     "tag": "v0.3.0-candidate",
-    "scope": "0.3.0 UI preview and private Dot pilot; local browser-panel reads and private ChatGPT status/search/read/preparation verified; native UI support, reboot recovery, public hosting and successful real sends remain unverified",
+    "scope": "0.3.0 UI preview and private Dot pilot; local browser-panel reads and private ChatGPT status/search/read/preparation verified; real sending confirmed by the operator on 2026-10-03; native UI support, reboot recovery and public hosting remain unverified",
     "clientSupport": {
       "codex": "primary target; 0.3.0 fresh local plugin installation, browser-panel rendering, connection and selected text read verified; native UI and real UI send unverified",
       "claudeCode": "experimental; format/protocol checks only",
@@ -60,9 +60,9 @@
     "Own source MIT does not relicense OpenWA or other dependencies"
   ],
   "evidence": {
-    "reviewedAt": "2026-10-02",
+    "reviewedAt": "2026-10-03",
     "automatedTests": "149 local Node tests, 83 online tests and 16 synthetic Chrome browser cases passed; native SDK exercised with a synthetic host, browser adapter with synthetic data. Attachment staging, account/digest binding, one-time approval, durable send reservations and uncertain outcomes covered. Production lockfile audits clean",
-    "liveAcceptance": "0.3.0 fresh local plugin installation and Codex browser-panel rendering verified. Selected text read, names and one incoming image checked without exporting private content. Synthetic PNG/document preparation and exact-file confirmation verified without upload/send. Private ChatGPT tunnel status/search/read/preparation verified. A user-reported real send failed for an unknown cause and was not repeated; successful delivery, native Codex MCP-App rendering and reboot recovery remain unverified. Historical 0.2.0 evidence remains in CLIENT_ACCEPTANCE.md",
+    "liveAcceptance": "0.3.0 fresh local plugin installation and Codex browser-panel rendering verified. Selected text read, names and one incoming image checked without exporting private content. Synthetic PNG/document preparation and exact-file confirmation verified without upload/send. Private ChatGPT tunnel status/search/read/preparation verified. On 2026-10-03 the operator confirmed successful real sending in personal use; no additional agent send or independent recipient receipt check. Native Codex MCP-App rendering, media delivery and reboot recovery remain unverified. Historical 0.2.0 evidence remains in CLIENT_ACCEPTANCE.md",
     "sourceLinks": [
       "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/README.md",
       "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/docs/FAQ.md",

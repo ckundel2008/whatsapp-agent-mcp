@@ -20,8 +20,9 @@ result. Safe errors include `CONFIRMATION_REQUIRED`, `APPROVAL_INVALID`,
 [online README](../online/README.md).
 
 The actual private ChatGPT path was checked for status, chat search, reading and
-prepare-only. A real send reported by the user failed for an unknown cause; it
-was not repeated, so sending and delivery remain unverified. Native Codex MCP-App
+prepare-only. On 2026-10-03, the operator confirmed successful real sending in
+personal use. This is user-reported live acceptance; the agent did not send a
+new message or independently verify recipient-side delivery. Native Codex MCP-App
 rendering is unverified, while the Codex browser panel was live-checked.
 
 On 2026-10-02, 149 local unit tests, 83 online tests and all 16 synthetic browser

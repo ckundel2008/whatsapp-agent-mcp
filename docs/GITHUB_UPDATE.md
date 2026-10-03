@@ -44,10 +44,12 @@ evidence. The private ChatGPT tunnel path has live status, search, selected-text
 read and preparation evidence. No private content or account material is
 included in the source package.
 
-Successful real text/media delivery, native Codex MCP-App rendering, reboot
-recovery, phone-Dot text reading and public multi-user operation remain open.
-A user-reported send failed for an undetermined reason and was not repeated;
-the error-classification fix does not establish successful delivery.
+On 2026-10-03, the operator confirmed that real sending now works in personal
+use. This is user-reported live acceptance; the agent did not send another
+message or independently inspect recipient-side delivery. The earlier failed
+attempt was not automatically retried and its exact cause remains undetermined.
+Real media delivery, native Codex MCP-App rendering, reboot recovery, phone-Dot
+text reading and public multi-user operation remain open.
 
 The private tunnel is a developer-mode connection and does not satisfy the
 public HTTPS MCP requirement. Public hosting and OpenAI submission remain

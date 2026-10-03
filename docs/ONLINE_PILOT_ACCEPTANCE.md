@@ -1,6 +1,6 @@
 # Online-Pilot: Nachweise und offene Abnahme
 
-Stand: 2. Oktober 2026. Gilt für die separate Entwicklungsversion in `online/`,
+Stand: 3. Oktober 2026; automatisierte Prüfungen vom 2. Oktober. Gilt für die separate Entwicklungsversion in `online/`,
 nicht für ein öffentlich veröffentlichtes Plugin. Keine Bereitstellung oder
 Verzeichnisaufnahme durchgeführt.
 
@@ -28,6 +28,7 @@ Verzeichnisaufnahme durchgeführt.
 | Echter ChatGPT-Leseaufruf über privaten Tunnel | Bestanden | Testchat „WhatsApp Verbindung prüfen“ meldet CONNECTED, sieben Suchtreffer, genau eine Textnachricht gelesen und vollständiges 30-Tage-Fenster; keine Nachricht vorbereitet oder versendet |
 | Diagnose des gemeldeten Versandfehlers | Ursache weiterhin unbestimmt | Privates Ledger ohne Reservierungen; echter lokaler Vorbereitungstest erfolgreich, null Send-Dispatches; sichere Vorprüfungsfehler jetzt als MCP-Toolergebnisse statt pauschalem RPC-Fehler; Runtime wieder healthy/ready |
 | Echter ChatGPT-Vorbereitungstest über privaten Tunnel | Bestanden | Testchat „WhatsApp Verbindung prüfen“ bestätigt Vorbereitung erfolgreich, kein Fehlercode; synthetischer Text in einem bestehenden Chat nur vorbereitet, Sendeaufruf ausdrücklich verboten, Ledger unverändert leer |
+| Echter Versand im persönlichen Betrieb | Am 3. Oktober vom Nutzer bestätigt | Nutzer meldet erfolgreichen Versand. Kein zusätzlicher Sendeaufruf oder unabhängiger Zustellungscheck durch den Agenten; kein Empfänger oder Nachrichtentext dokumentiert |
 
 Ausgeführt auf Node.js 24.20.0 auf diesem Mac. CI-Prüfung für Node 22/24 ist
 ergänzt, aber noch nicht bei GitHub ausgeführt. Die Online-Demo verwendet nur
@@ -70,12 +71,10 @@ diesen privaten Tunnel. [Privater Dot-Zugang](PRIVATE_DOT_CONNECTION.md)
   Textlesen über dasselbe Plugin funktionieren im echten ChatGPT-Testchat.
   Der neue Leseaufruf und eine Zusammenfassung im Handy-Dot bleiben offen;
   dafür ist keine allgemeine Rechnerfreigabe Bestandteil dieses Tunnelwegs.
-- **LIVE_SEND_NOT_VERIFIED:** ChatGPT hat nach ausdrücklicher Bestätigung die fünf
-  Werkzeuge übernommen. Ein Nutzer meldete einen fehlgeschlagenen Versand;
-  der Versuch wurde nicht wiederholt, die konkrete Fehlerursache bleibt offen.
-  Ein erfolgreicher echter Versand und Zustellung sind nicht belegt. Ein neuer
-  Versuch benötigt eine neue Vorbereitung und separate Bestätigung von Empfänger
-  und vollständigem Text.
+- **INDEPENDENT_DELIVERY_NOT_RUN:** Der Nutzer bestätigt am 3. Oktober
+  erfolgreichen Versand im persönlichen Betrieb. Ein zusätzlicher unabhängiger
+  Versand-/Zustellungscheck wurde nicht durchgeführt. Der frühere Fehlversuch
+  wurde nicht automatisch wiederholt; seine genaue Fehlerursache bleibt offen.
 - **REMOTE_OAUTH_LOGIN_NOT_RUN:** Etablierter Anbieter mit Discovery, PKCE,
   Clientregistrierung und korrekter Audience/Scope muss eingerichtet werden.
   Tokenprüfung ist implementiert, der vollständige Loginweg noch nicht.

@@ -187,6 +187,12 @@ Automationen und Gruppenverwaltung gehören weiterhin nicht zum Dot-Zugang.
 
 ## Aktueller Nachweisstand
 
+Am 3. Oktober 2026 bestätigt der Nutzer, dass der Versand im persönlichen
+Betrieb funktioniert. Dies ist eine Nutzerrückmeldung aus dem Praxistest;
+der Agent hat keine zusätzliche Nachricht gesendet oder den Empfänger-Verlauf
+geprüft. Empfänger, Text und Freigaben bleiben außerhalb der Projektunterlagen.
+Der unten dokumentierte frühere Fehlerstand bleibt als Diagnosehistorie erhalten.
+
 Nach dem Nutzerbericht über `Request failed` beim Versand wurde das private
 Ledger geprüft: Es gab keine Reservierung. Das grenzt den Abbruch auf eine
 Stelle vor dem Backend-Sendeaufruf beziehungsweise dessen Konto-Vorprüfung ein;
@@ -197,8 +203,8 @@ pauschale Fehlermeldung. 83 Online-Tests und der unabhängige Gegencheck bestand
 einschließlich eines Verbindungsabbruchs **nach** synthetischem Send-Dispatch,
 der weiterhin `DELIVERY_UNKNOWN` liefert und die Sperre behält. Die korrigierte
 private Runtime meldet erneut `healthy`, `ready` und `process_running`.
-Der gemeldete Versuch wurde nicht erneut gesendet. Ein erfolgreicher echter
-Versand ist weiterhin nicht nachgewiesen. Anschließend bestätigte auch der
+Der gemeldete Versuch wurde nicht erneut gesendet. Zu diesem Zeitpunkt war
+erfolgreicher echter Versand noch nicht nachgewiesen. Anschließend bestätigte auch der
 echte ChatGPT-Testchat über den neu gestarteten privaten Tunnel:
 „Vorbereitung erfolgreich: Ja. Fehlercode: Keiner.“ Der Auftrag untersagte
 `whatsapp_send_prepared` ausdrücklich; das private Ledger blieb leer.

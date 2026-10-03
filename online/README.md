@@ -154,8 +154,10 @@ Die synthetische Demo beweist Transport und Isolation, keine Live-Dots-Abnahme.
 Privater Handy-Dot-Status und private ChatGPT-Tunnelaufrufe für Suche, Lesen
 und Vorbereitung sind geprüft. Offen bleiben **HANDY_DOT_READ_NOT_RUN**,
 **PUBLIC_REMOTE_DOTS_NOT_RUN** und **REMOTE_OAUTH_LOGIN_NOT_RUN**.
-Erfolgreicher echter Versand ist nach einem gemeldeten Fehlversuch nicht belegt;
-dieser wurde nicht wiederholt. Siehe die [Pilot-Abnahme](../docs/ONLINE_PILOT_ACCEPTANCE.md).
+Am 3. Oktober 2026 bestätigt der Nutzer erfolgreichen Versand im persönlichen
+Betrieb. Der frühere Fehlversuch wurde nicht automatisch wiederholt; es gab
+keinen zusätzlichen Versand-/Zustellungscheck durch den Agenten.
+Siehe die [Pilot-Abnahme](../docs/ONLINE_PILOT_ACCEPTANCE.md).
 
 ## Weitere Etappen
 

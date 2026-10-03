@@ -178,8 +178,9 @@ update is prepared locally as a preview candidate; no public HTTPS deployment or
 OpenAI submission has been made. Fresh plugin
 installation and live text-history rendering in the Codex browser panel passed.
 The actual private ChatGPT path has been checked for status, search, reading and
-send preparation only. A user-reported real send failed for an unknown cause and
-was not repeated, so sending and delivery remain unverified. Native Codex MCP-App
+send preparation. On 2026-10-03, the operator confirmed that real sending works
+in personal use. This is user-reported live acceptance, without an additional
+agent-initiated send or independent receipt check. Native Codex MCP-App
 rendering is also unverified; see the [UI acceptance record](docs/UI_ACCEPTANCE.md).
 Other client packaging is experimental.
 Reboot, reauthentication, uninstall, real scheduled-send acceptance and

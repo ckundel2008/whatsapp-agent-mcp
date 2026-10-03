@@ -68,9 +68,10 @@ bestaetigten Textversand getestet. Claude Code/Desktop, Cursor, VS Code und ande
 MCP-Clients sind experimentell. Die lokale Plugininstallation und ein echter
 Textverlauf im Codex-Browserpanel sind fuer 0.3.0 geprueft. Der private
 ChatGPT-Weg wurde fuer Status, Suche, Lesen und reine Versandvorbereitung
-geprueft. Ein vom Nutzer gemeldeter echter Versand schlug aus unbekannter
-Ursache fehl und wurde nicht wiederholt; Versand und Zustellung bleiben daher
-unverifiziert. Native Codex-MCP-App-Darstellung ist ebenfalls unverifiziert.
+geprueft. Am 3. Oktober 2026 bestaetigt der Nutzer erfolgreichen Versand im
+persoenlichen Betrieb. Das ist eine Rueckmeldung aus der Nutzung, ohne
+zusaetzlichen Versand oder unabhaengigen Zustellungscheck durch den Agenten.
+Native Codex-MCP-App-Darstellung ist weiterhin unverifiziert.
 Recovery und echter UI-/geplanter Versand sind nicht abgenommen. Alte Automationsregeln
 muessen fuer die neue Capability ausdruecklich widerrufen und neu autorisiert
 werden. Fuer eine oeffentliche Aufnahme fehlen weiterhin HTTPS-Hosting und
