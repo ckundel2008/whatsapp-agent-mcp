@@ -34,8 +34,14 @@
 - Patched indirect runtime dependencies, including the exact Axios 1.20.0
   override for twelve newly reported advisories; production lockfile audit was
   clean on 2026-10-02. The 2026-10-03 recheck reports two new high advisories
-  in http-cache-semantics and braces with no published patched versions;
-  distributable release remains blocked, with no audit exception.
+  in http-cache-semantics and braces with no published patched versions.
+  Both are now repaired with transparent local forks, preserving their licenses
+  and upstream provenance. No audit exception was added; the strict check passes.
+- Added cache reuse restrictions that cannot be overridden by stale directives,
+  and a non-overridable parser/traversal depth limit with AST shape/cycle checks.
+  All 24 fork regressions pass, alongside 153 local and 83 online tests.
+  Installation includes both forks; source inventories and real OpenWA alias
+  checks prevent silently reverting to the unrepaired dependencies.
 - Native host rendering, recovery, real UI sends and public
   directory publication remain unverified. Public submission still requires a
   public HTTPS MCP endpoint, a supplied test account/walkthrough and OpenAI

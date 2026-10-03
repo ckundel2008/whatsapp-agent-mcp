@@ -11,11 +11,12 @@ overrides:
   brace-expansion: 5.0.12
   browserslist: 4.28.7
   baseline-browser-mapping: 2.11.0
+  braces: file:vendor/braces
   fast-uri: 3.1.8
   engine.io: 6.6.10
   file-type: 21.3.4
   got: 11.8.6
-  http-cache-semantics: 4.2.0
+  http-cache-semantics: file:vendor/http-cache-semantics
   ip-address: 10.7.1
   image-size: 2.0.3
   js-yaml: 3.15.2
@@ -390,6 +391,12 @@ packages:
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
 
+  '@whatsapp-assistant/braces-secure@file:vendor/braces':
+    resolution: {directory: vendor/braces, type: directory}
+
+  '@whatsapp-assistant/http-cache-semantics-secure@file:vendor/http-cache-semantics':
+    resolution: {directory: vendor/http-cache-semantics, type: directory}
+
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
 
@@ -577,10 +584,6 @@ packages:
   brace-expansion@5.0.12:
     resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==}
     engines: {node: 20 || >=22}
-
-  braces@3.0.3:
-    resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
-    engines: {node: '>=8'}
 
   browserslist@4.28.7:
     resolution: {integrity: sha512-JxV13hNrFxqjOc8alRbq9dK1MM79NEXYpma2B2J4wAtpWS5zIEIKqWPGCl7N4o7Uc7B7itylh7SuDujATRyyTw==}
@@ -1391,9 +1394,6 @@ packages:
   http-auth@3.2.4:
     resolution: {integrity: sha512-jeWAPP0UbI3dM6knyYbYbMvBoxwXGQp0eu70GGV9Ezo/pHmpv1dFLwM0CtaG+GFqUBkGZM/V8Jp/0gXFYwIOUQ==}
     engines: {node: '>=4.6.1'}
-
-  http-cache-semantics@4.2.0:
-    resolution: {integrity: sha512-dTxcvPXqPvXBQpq5dUr6mEMJX4oIEFv6bwom3FDwKRDsuIjjJGANqhBuoAn9c1RQJIdAKav33ED65E2ys+87QQ==}
 
   http-errors@2.0.0:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
@@ -3662,6 +3662,12 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
+  '@whatsapp-assistant/braces-secure@file:vendor/braces':
+    dependencies:
+      fill-range: 7.1.1
+
+  '@whatsapp-assistant/http-cache-semantics-secure@file:vendor/http-cache-semantics': {}
+
   '@xtuc/ieee754@1.2.0': {}
 
   '@xtuc/long@4.2.2': {}
@@ -3854,10 +3860,6 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
-  braces@3.0.3:
-    dependencies:
-      fill-range: 7.1.1
-
   browserslist@4.28.7:
     dependencies:
       baseline-browser-mapping: 2.11.0
@@ -3881,7 +3883,7 @@ snapshots:
     dependencies:
       clone-response: 1.0.3
       get-stream: 5.2.0
-      http-cache-semantics: 4.2.0
+      http-cache-semantics: '@whatsapp-assistant/http-cache-semantics-secure@file:vendor/http-cache-semantics'
       keyv: 4.5.4
       lowercase-keys: 2.0.0
       normalize-url: 6.1.0
@@ -3965,7 +3967,7 @@ snapshots:
   chokidar@3.6.0:
     dependencies:
       anymatch: 3.1.3
-      braces: 3.0.3
+      braces: '@whatsapp-assistant/braces-secure@file:vendor/braces'
       glob-parent: 5.1.2
       is-binary-path: 2.1.0
       is-glob: 4.0.3
@@ -4814,8 +4816,6 @@ snapshots:
       bcryptjs: 2.4.3
       uuid: 11.1.1
 
-  http-cache-semantics@4.2.0: {}
-
   http-errors@2.0.0:
     dependencies:
       depd: 2.0.0
@@ -5286,7 +5286,7 @@ snapshots:
 
   micromatch@4.0.8:
     dependencies:
-      braces: 3.0.3
+      braces: '@whatsapp-assistant/braces-secure@file:vendor/braces'
       picomatch: 2.3.2
 
   mime-db@1.47.0: {}

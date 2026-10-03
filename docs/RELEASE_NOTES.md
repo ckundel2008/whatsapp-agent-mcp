@@ -33,9 +33,9 @@ IDs, private URLs or session evidence are part of this source update.
 
 ### Known limits
 
-- The 2026-10-03 strict release recheck fails on two high runtime dependency
-  advisories with no published patched versions. Source can be reviewed in a
-  draft PR; no distributable release is approved. See [the current audit record](GITHUB_UPDATE.md#publication-recheck-on-2026-10-03).
+- The two high runtime findings from the 2026-10-03 recheck have been repaired
+  with documented local forks; the unchanged production audit and strict release
+  check pass. No fixed upstream npm version is claimed. See [security backports](DEPENDENCY_SECURITY_PATCHES.md).
 - A public MCP submission remains blocked without a public HTTPS endpoint, verified publisher identity, public policy links, and synthetic reviewer access. The private Secure MCP Tunnel does not meet this requirement.
 - The incoming-image defect is fixed and one real received image rendered in the installed Codex browser panel. Actual native Codex-host rendering and live audio/video/document reads remain unverified; reviewer-environment evidence is still required.
 - The native host UI and loopback fallback do not establish public review, fresh-client recovery, or real media-delivery acceptance.

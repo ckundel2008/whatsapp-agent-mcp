@@ -187,9 +187,10 @@ Reboot, reauthentication, uninstall, real scheduled-send acceptance and
 independent receipt on another device remain untested. Windows, Linux runtime
 installation, remote/cloud-only clients, and mobile clients are unsupported.
 
-The frozen dependency audit was clean on 2026-10-02. A fresh runtime audit on
-2026-10-03 reports two high advisories without published fixes; the
-[GitHub update record](docs/GITHUB_UPDATE.md) documents the release blocker.
+The production audit is clean again after the 2026-10-03 security backports.
+Two affected transitive packages are replaced by documented local repaired
+forks, with regression tests, licenses and source integrity checks. See the
+[security backport record](docs/DEPENDENCY_SECURITY_PATCHES.md).
 Publisher/repository is `ckundel2008/whatsapp-agent-mcp`, with MIT for own source.
 Private vulnerability reporting is enabled on GitHub. Stable source publication
 does not mean universal client acceptance or vendor-supported delivery;

@@ -79,6 +79,28 @@ fi
 /usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/package.json" "$RUNTIME_DIR/package.json"
 /usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/pnpm-lock.yaml" "$RUNTIME_DIR/pnpm-lock.yaml"
 /usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/pnpm-workspace.yaml" "$RUNTIME_DIR/pnpm-workspace.yaml"
+# Local security forks must accompany the lockfile's relative file overrides.
+# Copy only their published source files, never local dependency installations.
+/bin/mkdir -p "$RUNTIME_DIR/vendor"
+/bin/chmod 700 "$RUNTIME_DIR/vendor"
+/usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/vendor/patches.json" "$RUNTIME_DIR/vendor/patches.json"
+/usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/vendor-check.mjs" "$RUNTIME_DIR/vendor-check.mjs"
+for dependency_fork in braces http-cache-semantics; do
+  fork_source="$PLUGIN_ROOT/runtime/vendor/$dependency_fork"
+  fork_target="$RUNTIME_DIR/vendor/$dependency_fork"
+  if [ ! -f "$fork_source/package.json" ] || [ ! -f "$fork_source/LICENSE" ]; then
+    echo "Gepatchte Laufzeitabhaengigkeit fehlt: $dependency_fork" >&2
+    exit 1
+  fi
+  /bin/mkdir -p "$RUNTIME_DIR/vendor"
+  /bin/chmod 700 "$RUNTIME_DIR/vendor"
+  /usr/bin/find "$fork_source" -type f ! -path '*/node_modules/*' | while IFS= read -r fork_file; do
+    fork_relative=${fork_file#"$fork_source"/}
+    /bin/mkdir -p "$(/usr/bin/dirname "$fork_target/$fork_relative")"
+    /bin/chmod 700 "$(/usr/bin/dirname "$fork_target/$fork_relative")"
+    /usr/bin/install -m 600 "$fork_file" "$fork_target/$fork_relative"
+  done
+done
 /usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/service.mjs" "$RUNTIME_DIR/service.mjs"
 /usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/attachments.mjs" "$RUNTIME_DIR/attachments.mjs"
 /usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/media-reads.mjs" "$RUNTIME_DIR/media-reads.mjs"

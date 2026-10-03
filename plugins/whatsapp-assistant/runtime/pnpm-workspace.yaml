@@ -8,11 +8,12 @@ overrides:
   brace-expansion: 5.0.12
   browserslist: 4.28.7
   baseline-browser-mapping: 2.11.0
+  braces: file:vendor/braces
   fast-uri: 3.1.8
   engine.io: 6.6.10
   file-type: 21.3.4
   got: 11.8.6
-  http-cache-semantics: 4.2.0
+  http-cache-semantics: file:vendor/http-cache-semantics
   ip-address: 10.7.1
   image-size: 2.0.3
   js-yaml: 3.15.2

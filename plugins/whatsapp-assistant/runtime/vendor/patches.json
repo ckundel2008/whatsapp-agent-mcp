@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "forks": {
+    "braces": {
+      "files": {
+        "LICENSE": "35bdd8a44339719441900fb50fbefc5e2dca1ca662cbaed7a687de842c8b70f2",
+        "UPSTREAM.md": "ecaf6674a0c2ff9fa083a778450352248a5567c4f97d3fbdafe283ba7125e187",
+        "index.js": "332ea07c7b006361aad12aa994ca75dc1db8e8382b884909e2f38f10b85c88a4",
+        "lib/compile.js": "9fd714a338470623974138f3c21a0f57f6d798b51fb373f6b7e54b0e51fa747c",
+        "lib/constants.js": "c18ac5adb57308f1ce42a28552da3a31f5d83709743ebd9a636336813a744d4b",
+        "lib/expand.js": "894af4b42e374312d09b275e0810709c57a4915fcd09fdb0c0fb4efd7f806437",
+        "lib/parse.js": "8603ad5c541bde1d2ce09a3605dfcb7e08ebd04e706aeaee1bf25e7d0bee9259",
+        "lib/stringify.js": "fac2278db2ef3b3682e4782c5999a7cdd98efe5ab28a87a38554ed905f322afe",
+        "lib/utils.js": "38c6889a2af426f12bc105fd8706f34985cead652ecb771136428746a618b19e",
+        "package.json": "af1dbe1cf164a98a6f60f390bb0a639804bdb5827acbe5195d73b67a574f2fac",
+        "test/braces-depth.test.cjs": "ad430b13e683aa50c974b1c9bb7d31f18193ca8438e5f1d5d65ac9351fcd21ef"
+      }
+    },
+    "http-cache-semantics": {
+      "files": {
+        "LICENSE": "ab868ad5a2ef5068560d9cd3b2180ec63c140bb4c5cae1ba779d300a0ac74fa3",
+        "UPSTREAM.md": "bbe18ac6623aae58f8bbc76fd2f24819930c90ed67023909ae7042c224b73612",
+        "index.js": "bedb3a3a1dbdd8cb7425b06057dd5a841b41d6baa37848f1f08250d1c2bff542",
+        "package.json": "5d6f6981a4327eaaa177ee08787f53814f95b335c777a4615bc0b777b4731800",
+        "test/security.test.cjs": "7aefef398f5383db63af2f494a2b4516aab0291bfc2fc1f62436b16eb8a2be3e"
+      }
+    }
+  }
+}

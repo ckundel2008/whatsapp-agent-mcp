@@ -1,8 +1,17 @@
 # Third-party notices
 
 The repository contains its plugin/runtime source and a pinned dependency
-lockfile, not node_modules, WhatsApp sessions, Chrome binaries or OpenWA source.
+lockfile and two documented security forks, not node_modules, WhatsApp sessions,
+Chrome binaries or OpenWA source.
 Dependencies are downloaded separately during an explicitly approved install.
+
+Two repaired transitive runtime forks are included as source:
+
+- `braces` 3.0.3 by Jon Schlinkert, MIT. See [license](plugins/whatsapp-assistant/runtime/vendor/braces/LICENSE) and [provenance](plugins/whatsapp-assistant/runtime/vendor/braces/UPSTREAM.md).
+- `http-cache-semantics` 4.2.0 by Kornel Lesinski, BSD-2-Clause. See [license](plugins/whatsapp-assistant/runtime/vendor/http-cache-semantics/LICENSE) and [provenance](plugins/whatsapp-assistant/runtime/vendor/http-cache-semantics/UPSTREAM.md).
+
+Their local security corrections retain these licenses; the project's MIT
+license does not replace them. See [maintenance and regression checks](docs/DEPENDENCY_SECURITY_PATCHES.md).
 
 Direct runtime dependency: `@open-wa/wa-automate` 4.76.0, maintained by OpenWA.
 Its package.json reports `H-DNH V1.0`, while the included LICENSE.md is titled
