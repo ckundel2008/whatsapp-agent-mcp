@@ -42,6 +42,13 @@
   All 24 fork regressions pass, alongside 153 local and 83 online tests.
   Installation includes both forks; source inventories and real OpenWA alias
   checks prevent silently reverting to the unrepaired dependencies.
+- Fixed macOS daemon startup when `Chrome --version` hangs: read the installed
+  app's version metadata without launching it, retaining strict validation and
+  Chrome hardening. Four new regressions pass; the local suite now has 157 tests.
+- Activated the repaired dependencies in the operator's installed runtime and
+  cached local plugin after explicit authorization. A managed restart recovered
+  CONNECTED with the same account; private MCP status and installed fork hashes
+  passed. No chat read or send was used for this activation check.
 - Native host rendering, recovery, real UI sends and public
   directory publication remain unverified. Public submission still requires a
   public HTTPS MCP endpoint, a supplied test account/walkthrough and OpenAI

@@ -33,6 +33,11 @@ IDs, private URLs or session evidence are part of this source update.
 
 ### Known limits
 
+- The operator's installed runtime was updated with the repaired dependencies
+  and restarted on 2026-10-03. The managed daemon and private MCP status path
+  are connected with the same account. A Chrome version-query timeout found
+  during activation was fixed by reading local app metadata; 157 local tests
+  pass. This check did not perform a real send or read chat content.
 - The two high runtime findings from the 2026-10-03 recheck have been repaired
   with documented local forks; the unchanged production audit and strict release
   check pass. No fixed upstream npm version is claimed. See [security backports](DEPENDENCY_SECURITY_PATCHES.md).

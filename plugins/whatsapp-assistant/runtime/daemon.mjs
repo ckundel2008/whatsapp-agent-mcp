@@ -3,10 +3,9 @@ import { createConnection, createServer } from "node:net";
 import { homedir } from "node:os";
 import path from "node:path";
 import { createRequire } from "node:module";
-import { execFileSync } from "node:child_process";
 import { createWhatsAppService } from "./service.mjs";
 import { createAutomationPolicyStore } from "./automation-policy.mjs";
-import { hardenChromeLaunch } from "./security.mjs";
+import { hardenChromeLaunch, installedChromeVersion } from "./security.mjs";
 import { LOCAL_OPENWA_PATCHES, LOCAL_OPENWA_PATCH_TAG } from "./local-patches.mjs";
 
 process.umask(0o077);
@@ -33,9 +32,7 @@ const logPath = path.join(logDir, "metadata.jsonl");
 const chromePath = process.env.WHATSAPP_ASSISTANT_CHROME || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 function installedChromeUserAgent() {
-  const output = execFileSync(chromePath, ["--version"], { encoding: "utf8", timeout: 5_000 });
-  const version = output.match(/\b(\d+(?:\.\d+){3})\b/)?.[1];
-  if (!version) throw new Error("Installed Google Chrome version could not be determined.");
+  const version = installedChromeVersion(chromePath);
   return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${version} Safari/537.36`;
 }
 

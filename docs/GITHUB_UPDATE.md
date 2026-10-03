@@ -25,7 +25,7 @@ This record is not an OpenAI approval or a GitHub release.
 
 | Check | Result |
 | --- | --- |
-| Local Node suite | 153/153 passed on 2026-10-03 |
+| Local Node suite | 157/157 passed on 2026-10-03, including the Chrome startup regression |
 | Online suite | 83/83 passed |
 | Synthetic browser suite | 16/16 passed, macOS / Chrome 154.0.8037.93 |
 | Bundled UI build | Passed, no CDN runtime resources |
@@ -58,6 +58,26 @@ Node 24/macOS, plus exact runtime dependency-floor checks. The first hosted run
 passed source and UI checks and failed on the runtime audit; the repaired
 source needs a fresh hosted run. Browser tests use synthetic accounts
 and a simulated MCP App host, not a real native Codex MCP-App acceptance run.
+
+### Local runtime activation on 2026-10-03
+
+After explicit operator authorization, the installed runtime and cached local
+plugin were updated to the repaired dependency set. A frozen installation and
+all installed-fork checks passed before the runtime was swapped, preserving a
+private rollback copy and the existing account/session material.
+
+The first restart exposed an independent macOS startup defect: invoking Chrome
+with `--version` timed out. The daemon now reads CFBundleShortVersionString from
+the installed app's Info.plist through plutil, without launching Chrome to
+inspect its version. Four regression cases cover this path and closed failure
+on invalid metadata; the remaining Chrome hardening is unchanged.
+
+The managed daemon is now CONNECTED to the same account, and complete installed
+fork file inventories match the reviewed source. The private MCP status route
+reports connected=true, read_only=false and send_requires_confirmation=true;
+the existing tunnel and its child remained running. This status check did not
+read chats or send a message. Native host rendering, media delivery and an
+end-to-end phone-Dot action remain separate acceptance boundaries.
 
 ## Acceptance boundaries
 
