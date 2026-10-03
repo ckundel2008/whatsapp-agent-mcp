@@ -1,0 +1,18 @@
+{
+  "name": "@whatsapp-assistant/http-cache-semantics-secure",
+  "version": "0.3.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "index.js",
+  "types": "index.js",
+  "license": "BSD-2-Clause",
+  "author": "Kornel Lesinski",
+  "description": "Locally maintained security backport of http-cache-semantics 4.2.0",
+  "upstream": {
+    "name": "http-cache-semantics",
+    "version": "4.2.0",
+    "repository": "https://github.com/kornelski/http-cache-semantics",
+    "integrity": "sha512-dTxcvPXqPvXBQpq5dUr6mEMJX4oIEFv6bwom3FDwKRDsuIjjJGANqhBuoAn9c1RQJIdAKav33ED65E2ys+87QQ==",
+    "securityPatch": "14a8c2ad51740dc39bf3e8f1a11c845a5003f217"
+  }
+}

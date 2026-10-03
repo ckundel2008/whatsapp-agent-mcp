@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
+import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileDigest, verifyVendoredDependencies } from "../runtime/vendor-check.mjs";
+
+const dependencyForks = verifyVendoredDependencies();
 
 const require = createRequire(new URL("../runtime/daemon.mjs", import.meta.url));
 const packagePath = require.resolve("@open-wa/wa-automate/package.json");
@@ -11,6 +15,34 @@ for (const module of ["config/puppeteer.config.js", "utils/tools.js", "controlle
   require(path.join(path.dirname(packagePath), "dist", module));
 }
 const openWaRequire = createRequire(packagePath);
+
+// Resolve the real transitive aliases used by OpenWA, not a direct test import.
+const chokidarRequire = createRequire(openWaRequire.resolve("chokidar"));
+const bracesPackage = chokidarRequire.resolve("braces/package.json");
+let cacheRequire = openWaRequire;
+for (const dependency of ["puppeteer-extra-plugin-devtools", "got", "cacheable-request"]) {
+  cacheRequire = createRequire(cacheRequire.resolve(dependency));
+}
+const cachePackage = cacheRequire.resolve("http-cache-semantics/package.json");
+for (const [manifestPath, fork, regression] of [
+  [bracesPackage, "braces", "braces-depth.test.cjs"],
+  [cachePackage, "http-cache-semantics", "security.test.cjs"],
+]) {
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  assert.equal(manifest.name, `@whatsapp-assistant/${fork}-secure`);
+  assert.equal(manifest.version, "0.3.0");
+  assert.equal(manifest.private, true);
+  for (const [file, sha256] of Object.entries(dependencyForks[fork].files)) {
+    assert.equal(fileDigest(path.join(path.dirname(manifestPath), file)), sha256, `Installed fork differs: ${fork}/${file}`);
+  }
+  const installedEntry = path.join(path.dirname(manifestPath), "index.js");
+  const bundledEntry = new URL(`../runtime/vendor/${fork}/index.js`, import.meta.url);
+  assert.deepEqual(readFileSync(installedEntry), readFileSync(bundledEntry));
+  execFileSync(process.execPath, ["--test", path.join(path.dirname(manifestPath), "test", regression)], {
+    stdio: "inherit", timeout: 10_000,
+  });
+}
+assert.doesNotMatch(readFileSync(new URL("../runtime/pnpm-lock.yaml", import.meta.url), "utf8"), /^  (?:braces|http-cache-semantics)@\d/m);
 const puppeteerPath = openWaRequire.resolve("puppeteer-core/package.json");
 const puppeteer = require(path.dirname(puppeteerPath));
 const puppeteerRequire = createRequire(puppeteerPath);

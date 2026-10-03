@@ -2,6 +2,10 @@
 **/node_modules/
 .release-local/
 dist/
+!plugins/whatsapp-assistant/web/dist/
+!plugins/whatsapp-assistant/web/dist/index.html
+**/test-results/
+**/playwright-report/
 coverage/
 .env
 .env.*

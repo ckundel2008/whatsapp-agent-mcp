@@ -2,19 +2,19 @@
   "schemaVersion": 1,
   "name": "WhatsApp Assistant",
   "repository": "https://github.com/ckundel2008/whatsapp-agent-mcp",
-  "summary": "Local WhatsApp MCP server and agent plugin for selected text chats and separately confirmed replies in Codex, Claude Code and other local MCP clients on macOS.",
+  "summary": "Local WhatsApp MCP server and agent plugin with a graphical UI preview for Codex on macOS, selected text/media and separately confirmed replies, plus an opt-in private personal-Dot pilot through Secure MCP Tunnel.",
   "maintainer": { "name": "ckundel2008", "url": "https://github.com/ckundel2008" },
   "license": {
     "ownSource": "MIT",
     "thirdPartyNotices": "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/THIRD_PARTY_NOTICES.md"
   },
   "kind": "local-stdio-mcp-server-and-agent-plugin",
-  "maturity": "stable-community-source-codex-focused",
+  "maturity": "0.3.0-local-ui-candidate",
   "release": {
-    "tag": "v0.2.0",
-    "scope": "Existing Codex Desktop interactive path with runtime 0.2.0; fresh plugin installation, recovery and real scheduled sends untested",
+    "tag": "v0.3.0-candidate",
+    "scope": "0.3.0 UI preview and private Dot pilot; local browser-panel reads and private ChatGPT status/search/read/preparation verified; real text sending, including through the personal Dot after the runtime update, confirmed by the operator on 2026-10-03; native UI support, reboot recovery and public hosting remain unverified",
     "clientSupport": {
-      "codex": "primary target; existing-client interactive path live-tested, cached plugin 0.1.0, runtime 0.2.0",
+      "codex": "primary target; 0.3.0 fresh local plugin installation, browser-panel rendering, connection and selected text read verified; native UI and real UI send unverified",
       "claudeCode": "experimental; format/protocol checks only",
       "claudeDesktop": "experimental; configuration/protocol checks only",
       "cursor": "experimental; configuration/protocol checks only",
@@ -39,8 +39,8 @@
   "unsuitableFor": [
     "Official WhatsApp Business Platform integration or vendor-supported critical delivery",
     "Bulk outreach, new-number sends or incoming-triggered automatic replies",
-    "Media downloads, calls or full-history archives",
-    "Windows/Linux runtime installation or cloud-only/remote/mobile clients",
+    "Model-facing media downloads, calls or full-history archives",
+    "Windows/Linux runtime installation or cloud-only operation without a user-owned WhatsApp host",
     "Offline AI or a promise that requested data never reaches an AI provider"
   ],
   "capabilities": [
@@ -54,15 +54,15 @@
   "limitations": [
     "Text reads are selected-chat, paginated and bounded to the last 30 days; incomplete history is reported",
     "Unofficial OpenWA/WhatsApp Web integration may break or lead to account restrictions",
-    "The bridge has no TCP listener or own cloud relay; Chrome still connects to WhatsApp and tool data enters the chosen AI context",
+    "The UI adapter listens only on loopback; the separate private Dot pilot uses the official Secure MCP Tunnel and has no public production endpoint. Chrome connects to WhatsApp; selected text-tool data and explicitly selected UI content enter the chosen AI context",
     "The host cannot cryptographically prove human confirmation or scheduler origin; bearer capabilities remain sensitive",
     "GitHub source distribution only; packages remain private, not an npm-installed product",
     "Own source MIT does not relicense OpenWA or other dependencies"
   ],
   "evidence": {
-    "reviewedAt": "2026-09-16",
-    "automatedTests": "75 synthetic runtime regression tests passed under Node 22.13 and 24 before these documentation-only changes",
-    "liveAcceptance": "Authorized default-runtime upgrade/restart, existing Codex tool path and dedicated-chat send confirmation with exact ID/text readback passed; fresh client installations, reboot/recovery and independent remote-device receipt pending",
+    "reviewedAt": "2026-10-03",
+    "automatedTests": "157 local Node tests including four Chrome startup regressions pass on 2026-10-03; 83 online tests and 24 installed security-fork regression cases passed during the security repair. All five hosted jobs passed on the repaired dependency and Chrome startup commit (8fe6e182bc369d6b915bc3d57b7a61d40af690d6, run 37098211435). Two runtime advisories repaired with transparent local forks, full source inventories and unchanged production audit; strict release check and frozen installation pass",
+    "liveAcceptance": "0.3.0 fresh local plugin installation and Codex browser-panel rendering verified. Selected text read, names and one incoming image checked without exporting private content. Synthetic PNG/document preparation and exact-file confirmation verified without upload/send. Private ChatGPT tunnel status/search/read/preparation verified. On 2026-10-03 the operator confirmed successful real text sending in personal use, explicitly including through the personal Dot after the runtime update. After explicit authorization, the repaired dependencies and Chrome startup fix were activated in the installed runtime/cached plugin; the managed daemon reconnected to the same account and private MCP status reports connected with confirmed sending enabled. No chat read or additional agent send was used for activation, and no independent recipient receipt check. Native Codex MCP-App rendering, media delivery and reboot recovery remain unverified. Historical 0.2.0 evidence remains in CLIENT_ACCEPTANCE.md",
     "sourceLinks": [
       "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/README.md",
       "https://github.com/ckundel2008/whatsapp-agent-mcp/blob/main/docs/FAQ.md",

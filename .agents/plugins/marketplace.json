@@ -14,7 +14,8 @@
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
-      "category": "Productivity"
+      "category": "Productivity",
+      "description": "Local WhatsApp tools and graphical UI candidate with bounded reads and separately confirmed text replies; native UI support unverified."
     }
   ]
 }

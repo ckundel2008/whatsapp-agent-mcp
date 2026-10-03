@@ -1,8 +1,36 @@
 # WhatsApp Assistant — local runtime
 
-Text-only WhatsApp tools for Codex, Claude Code and local stdio MCP clients.
+WhatsApp tools and a graphical UI candidate for Codex, Claude Code and local
+stdio MCP clients.
 No local TCP listener or plugin-operated cloud relay. Tool data still enters
 your chosen AI client/provider's context: [Privacy](docs/PRIVACY.md).
+
+## Graphical UI candidate
+
+The bundled UI provides connection status, chat search, an unread filter,
+selected-chat text/media history, bounded older-page loading and a two-step reply
+confirmation. Attach one user-selected image or file up to 16 MiB, with an optional
+caption. Raster images show a preview; other files display their name and size.
+The final confirmation binds the recipient, complete caption and exact file.
+Files stay in local memory and are never included in model hand-offs. Incoming
+media up to 16 MiB opens only after an explicit click: raster images, audio and
+video have a viewer; other files are download-only. Available profile pictures
+are loaded for visible chats, with initials as fallback.
+It shares the existing local action layer and keeps view state
+in memory. Native Codex UI support is **UNVERIFIED**; the loopback panel can be
+started explicitly after the frontend has been built:
+
+```sh
+./scripts/run-ui.sh
+```
+
+Danach die ausgegebene Loopback-URL (standardmaessig
+`http://127.0.0.1:8765/`) im Browserpanel oeffnen.
+
+The UI does not start the WhatsApp daemon or link an account automatically.
+Selected messages can be sent to the model explicitly for summary or drafting
+in a native host; in a browser panel use the copy action. See [UI acceptance](../../docs/UI_ACCEPTANCE.md),
+[support](docs/SUPPORT.md) and [terms](docs/TERMS.md).
 
 ## Requirements and risk
 
@@ -119,7 +147,8 @@ targets from incoming messages. See [Migration](docs/MIGRATION.md) for old rules
 - Missing capability: old/lost authorization must be revoked and explicitly renewed.
 - Incomplete history: report it and continue bounded loading, not a “complete scan”.
 
-Only existing chats and text. No new numbers, media, bulk sends, forwards,
+Only existing chats: text history and confirmed text or UI attachment replies.
+The six model-facing tools remain text-only. No new numbers, bulk sends, forwards,
 incoming-triggered replies, calls, deletion, archiving or group administration.
 Windows/Linux runtime installers and remote/cloud-only/mobile clients are not
 supported. The stable community source release is Codex-focused: the existing
@@ -131,5 +160,5 @@ and real scheduled sends remain untested. See [the exact scope](../../docs/COMPA
 
 Own plugin/runtime source: [MIT](LICENSE). Publisher metadata: `ckundel2008`.
 Source repository: [ckundel2008/whatsapp-agent-mcp](https://github.com/ckundel2008/whatsapp-agent-mcp),
-published as the Codex-focused community source release `v0.2.0`. OpenWA and other dependencies are not
+with the `v0.3.0` UI candidate prepared locally. Public publication is not complete. OpenWA and other dependencies are not
 relicensed; see [third-party notices](THIRD_PARTY_NOTICES.md).

@@ -1,0 +1,11 @@
+{
+  "status": "INPUTS_REQUIRED_NOT_PUBLISHED",
+  "verified_publisher_name": null,
+  "support_email": null,
+  "public_website_origin": null,
+  "platform_organization_reference": null,
+  "local_mcp_review_approval_reference": null,
+  "reviewer_demo_access_reference": null,
+  "reviewer_walkthrough_url": null,
+  "note": "Non-secret input template. Never add passwords, WhatsApp sessions, QR codes, tokens or private chat data. Reviewer credentials belong only in the secure OpenAI dashboard."
+}

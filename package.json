@@ -1,6 +1,6 @@
 {
   "name": "whatsapp-assistant-community",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Local WhatsApp MCP tools for Codex on macOS: scoped reads and confirmed replies. Claude and other local MCP clients are experimental.",
   "type": "module",
@@ -12,6 +12,11 @@
   "keywords": ["whatsapp", "mcp", "mcp-server", "codex", "claude-code", "agent-skills", "macos", "local-first", "privacy"],
   "engines": { "node": ">=22.13" },
   "scripts": {
+    "online:test": "npm --prefix online test",
+    "online:demo": "npm --prefix online run demo",
+    "online:status-probe": "npm --prefix online run status-probe",
+    "ui:build": "npm --prefix plugins/whatsapp-assistant/web run build",
+    "ui:test": "npm --prefix plugins/whatsapp-assistant/web run test:browser",
     "test": "node --test plugins/whatsapp-assistant/tests/*.test.mjs",
     "check": "node scripts/check-release.mjs",
     "release:check": "node scripts/check-release.mjs --publish",

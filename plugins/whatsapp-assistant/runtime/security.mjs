@@ -1,3 +1,20 @@
+import { execFileSync } from "node:child_process";
+import path from "node:path";
+
+export function installedChromeVersion(chromePath, { platform = process.platform, execFile = execFileSync } = {}) {
+  // macOS Chrome can keep --version alive as a GUI process. Reading signed app
+  // metadata avoids launching Chrome just to select the matching user agent.
+  const output = platform === "darwin"
+    ? execFile("/usr/bin/plutil", ["-extract", "CFBundleShortVersionString", "raw", "-o", "-",
+      path.resolve(path.dirname(chromePath), "..", "Info.plist")], { encoding: "utf8", timeout: 5_000 })
+    : execFile(chromePath, ["--version"], { encoding: "utf8", timeout: 5_000 });
+  const version = platform === "darwin"
+    ? String(output).trim().match(/^\d+(?:\.\d+){3}$/)?.[0]
+    : String(output).match(/\b(\d+(?:\.\d+){3})\b/)?.[1];
+  if (!version) throw new Error("Installed Google Chrome version could not be determined.");
+  return version;
+}
+
 const FORBIDDEN_EXACT = new Set([
   "--no-sandbox",
   "--disable-setuid-sandbox",

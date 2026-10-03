@@ -20,7 +20,7 @@ function smoke(t, server, cwd, extraEnv = {}) {
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stderr, "");
   const response = JSON.parse(result.stdout.trim());
-  assert.equal(response.result.serverInfo.version, "0.2.0");
+  assert.equal(response.result.serverInfo.version, "0.3.0");
   assert.equal(response.result.protocolVersion, "2025-06-18");
 }
 

@@ -1,10 +1,13 @@
 import { createHash, randomBytes, randomUUID as nodeRandomUUID } from "node:crypto";
+import { AttachmentStore, MAX_ATTACHMENT_BYTES } from "./attachments.mjs";
+import { HISTORY_WINDOW_MS as MEDIA_HISTORY_WINDOW_MS, MAX_MEDIA_READ_BYTES, MAX_PROFILE_BYTES, MediaReadStore, decodeCanonicalBase64, mediaPlaceholder, openMediaProjection, profilePictureProjection, uiMessagesProjection, validMime, validateOwnerToken } from "./media-reads.mjs";
 
 const APPROVAL_TTL_MS = 10 * 60 * 1000;
 const SEND_RATE_WINDOW_MS = 60 * 1000;
 const SEND_RATE_LIMIT = 5;
 const MAX_PAGE_SIZE = 100;
 const MAX_MESSAGE_TEXT = 10_000;
+const MAX_ATTACHMENT_NAME = 255;
 const HISTORY_WINDOW_DAYS = 30;
 const HISTORY_WINDOW_MS = HISTORY_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 const MAX_HISTORY_LOAD_BATCHES = 20;
@@ -174,7 +177,8 @@ export function chatMetadataProjection({ operation, targetChatId, includePreview
   if (operation !== "listChats" && operation !== "resolveChat") throw new Error("Unsupported fixed browser projection.");
   const collection = window.Store?.Chat;
   const idOf = (chat) => chat?.id?._serialized || String(chat?.id || "");
-  const titleOf = (chat) => String(chat?.formattedTitle || chat?.name || chat?.contact?.formattedName || chat?.contact?.name || idOf(chat));
+  const titleOf = (chat) => window.WAPI?.resolveAssistantName?.({ kind: "chat", chat })
+    || String(chat?.formattedTitle || chat?.name || chat?.contact?.formattedName || chat?.contact?.name || idOf(chat));
   const project = (chat) => {
     const messages = chat?.msgs?._models || chat?.msgs?.models || [];
     const last = messages[messages.length - 1];
@@ -215,7 +219,7 @@ export async function sendExistingTextProjection({
   if (!chat) return { status: "identity_changed" };
 
   const serializedChatId = chat?.id?._serialized || String(chat?.id || "");
-  const title = String(
+  const title = root.WAPI?.resolveAssistantName?.({ kind: "chat", chat }) || String(
     chat?.formattedTitle ||
       chat?.name ||
       chat?.contact?.formattedName ||
@@ -343,6 +347,126 @@ export async function sendExistingTextProjection({
   return { status: "unconfirmed" };
 }
 
+// Fixed modern WhatsApp Web media pipeline. Reference API compatibility:
+// whatsapp-web.js (Apache-2.0), src/util/Injected/Utils.js processMediaData/sendMessage.
+// Adapted to fixed local input, existing-chat/account checks and exact MsgKey
+// confirmation. Copyright 2019 Pedro S Lopez; see licenses/whatsapp-web-js.txt.
+// No downloaded code, path, remote URL, arbitrary module name or media read API.
+export async function sendExistingAttachmentProjection({ operation, targetChatId, expectedTitle, expectedGroup, expectedAccountId, dataUrl, name, mime, caption }) {
+  if (operation !== "sendExistingAttachment") throw new Error("Unsupported fixed browser projection.");
+  const root = globalThis.window || globalThis;
+  const store = root.Store;
+  const get = (moduleName) => { try { return root.require?.(moduleName); } catch { return undefined; } };
+  const userPrefs = get("WAWebUserPrefsMeUser");
+  const msgKey = get("WAWebMsgKey");
+  const MsgKey = typeof msgKey === "function" ? msgKey : msgKey?.default;
+  const widFactory = get("WAWebWidFactory");
+  const rawPrep = get("WAWebPrepRawMedia");
+  const OpaqueData = get("WAWebMediaOpaqueData");
+  const storage = get("WAWebMediaStorage");
+  const types = get("WAWebMmsMediaTypes");
+  const uploader = get("WAWebMediaMmsV4Upload");
+  const send = get("WAWebSendMsgChatAction")?.addAndSendMsgToChat;
+  const normalize = (value) => String(value?._serialized || value || "").split("@", 1)[0].replace(/\D/g, "");
+  const chat = store?.Chat?.get?.(targetChatId);
+  const unchanged = () => {
+    const current = store?.Chat?.get?.(targetChatId);
+    const id = current?.id?._serialized || String(current?.id || "");
+    const title = root.WAPI?.resolveAssistantName?.({ kind: "chat", chat: current }) || String(current?.formattedTitle || current?.name || id);
+    return current === chat && id === targetChatId && title === expectedTitle
+      && (Boolean(current?.isGroup) || id.endsWith("@g.us")) === expectedGroup
+      && current?.canSend !== false && current?.isReadOnly !== true
+      && !!normalize(userPrefs?.getMaybeMePnUser?.()) && normalize(userPrefs?.getMaybeMePnUser?.()) === normalize(expectedAccountId);
+  };
+  if (!chat || !unchanged()) return { status: "identity_changed" };
+  if (typeof MsgKey !== "function" || typeof msgKey?.newId !== "function" || typeof send !== "function"
+    || typeof widFactory?.asUserWidOrThrow !== "function" || typeof userPrefs?.getMaybeMeLidUser !== "function"
+    || typeof rawPrep?.prepRawMedia !== "function" || typeof OpaqueData?.createFromData !== "function"
+    || typeof storage?.getOrCreateMediaObject !== "function" || typeof types?.msgToMediaType !== "function"
+    || typeof uploader?.uploadMedia !== "function" || typeof dataUrl !== "string"
+    || !dataUrl.startsWith(`data:${mime};base64,`)) return { status: "send_unavailable" };
+  const binary = root.atob(dataUrl.slice(dataUrl.indexOf(",") + 1));
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  const file = new root.File([bytes], name, { type: mime });
+  const isRaster = /^(image\/jpeg|image\/png|image\/gif|image\/webp)$/i.test(mime);
+  const opaque = await OpaqueData.createFromData(file, mime);
+  if (!unchanged()) return { status: "identity_changed" };
+  const prep = rawPrep.prepRawMedia(opaque, { asDocument: !isRaster, asSticker: false, asGif: false, isPtt: false });
+  const media = await prep.waitForPrep();
+  if (!unchanged()) return { status: "identity_changed" };
+  if (!media?.filehash || (!isRaster && media.type !== "document")) return { status: "send_unavailable" };
+  const mediaObject = storage.getOrCreateMediaObject(media.filehash);
+  if (!(media.mediaBlob instanceof OpaqueData)) media.mediaBlob = await OpaqueData.createFromData(media.mediaBlob, media.mediaBlob.type);
+  media.renderableUrl = media.mediaBlob.url();
+  mediaObject.consolidate(media.toJSON());
+  media.mediaBlob.autorelease();
+  const cachePolicy = get("WAWebMediaDataUtils");
+  if (typeof cachePolicy?.shouldUseMediaCache === "function" && typeof types?.castToV4 === "function"
+    && cachePolicy.shouldUseMediaCache(types.castToV4(mediaObject.type))) {
+    get("WAWebMediaInMemoryBlobCache")?.InMemoryMediaBlobCache?.put(mediaObject.filehash, media.mediaBlob.formData());
+  }
+  if (!unchanged()) return { status: "identity_changed" };
+  const uploaded = await uploader.uploadMedia({ mimetype: media.mimetype, mediaObject, mediaType: types.msgToMediaType({ type: media.type, isGif: media.isGif, isNewsletter: false }) });
+  if (!unchanged()) return { status: "identity_changed" };
+  const entry = uploaded?.mediaEntry;
+  if (!entry?.mmsUrl || !entry?.mediaKey) return { status: "send_unavailable" };
+  media.set({ clientUrl: entry.mmsUrl, deprecatedMms3Url: entry.deprecatedMms3Url, directPath: entry.directPath,
+    mediaKey: entry.mediaKey, mediaKeyTimestamp: entry.mediaKeyTimestamp, filehash: mediaObject.filehash,
+    encFilehash: entry.encFilehash, uploadhash: entry.uploadHash, size: mediaObject.size,
+    streamingSidecar: entry.sidecar, firstFrameSidecar: entry.firstFrameSidecar, mediaHandle: null });
+  let from = typeof chat.id?.isLid === "function" && chat.id.isLid() ? userPrefs.getMaybeMeLidUser() : userPrefs.getMaybeMePnUser();
+  let participant;
+  if (expectedGroup) { from = chat.groupMetadata?.isLidAddressingMode ? userPrefs.getMaybeMeLidUser() : userPrefs.getMaybeMePnUser(); participant = widFactory.asUserWidOrThrow(from); }
+  if (!from) return { status: "identity_changed" };
+  const stanza = await msgKey.newId();
+  if (!unchanged()) return { status: "identity_changed" };
+  const key = new MsgKey({ from, to: chat.id, id: stanza, participant, selfDir: "out" });
+  const keyText = (value) => typeof value === "string" ? value : value?._serialized || (typeof value?.toString === "function" ? String(value) : "");
+  const expectedId = keyText(key);
+  if (!/^true_/.test(expectedId) || expectedId.length < 10) return { status: "send_unavailable" };
+  const message = { ...get("WAWebGetEphemeralFieldsMsgActionsUtils")?.getEphemeralFields?.(chat), ...media.toJSON(),
+    id: key, ack: 0, from, to: chat.id, local: true, self: "out", t: Math.floor(Date.now() / 1000), isNewMsg: true,
+    type: media.type, body: media.preview || "", caption, filename: name };
+  delete message.__x_id;
+  const pending = await send(chat, message);
+  if (Array.isArray(pending)) await Promise.all(pending);
+  // Confirm only our generated complete MsgKey plus media hash and caption.
+  // A concurrent own send of an equal-sized file cannot satisfy this check.
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const sent = store?.Msg?.get?.(key) || store?.Msg?.get?.(expectedId)
+      || (chat.msgs?._models || chat.msgs?.models || []).find((item) => keyText(item?.id) === expectedId);
+    if (sent && keyText(sent.id) === expectedId && (sent.id?.fromMe || sent.fromMe || sent.self === "out" || sent.isSentByMe)
+      && keyText(sent.to) === targetChatId && sent.filehash === media.filehash
+      && String(sent.caption || "") === caption && sent.type === media.type) return { status: "sent", message_id: expectedId };
+    if (attempt < 39) await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  return { status: "unconfirmed" };
+}
+
+// Fixed synthetic files only: exercise local preparation without upload/send,
+// contacts, messages, URLs or a caller-provided file. Used for local acceptance.
+export async function checkAttachmentPreparationProjection() {
+  const root = globalThis.window || globalThis;
+  const get = (name) => { try { return root.require?.(name); } catch { return undefined; } };
+  const opaque = get("WAWebMediaOpaqueData");
+  const prep = get("WAWebPrepRawMedia");
+  const probe = async (base64, mime, name, asDocument) => {
+    try {
+      const binary = root.atob(base64);
+      const file = new root.File([Uint8Array.from(binary, (character) => character.charCodeAt(0))], name, { type: mime });
+      const data = await opaque.createFromData(file, mime);
+      const media = await prep.prepRawMedia(data, { asDocument, asSticker: false, asGif: false, isPtt: false }).waitForPrep();
+      const result = { prepared: !!media?.filehash, type: String(media?.type || ""), has_blob: !!media?.mediaBlob };
+      media?.mediaBlob?.autorelease?.();
+      return result;
+    } catch { return { prepared: false }; }
+  };
+  return {
+    image: await probe("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAADklEQVR4nGP4DwYMEAoAU7oL9ZisIGcAAAAASUVORK5CYII=", "image/png", "synthetic.png", false),
+    document: await probe("c3ludGhldGljIGF0dGFjaG1lbnQgY29tcGF0aWJpbGl0eSBjaGVjaw==", "application/octet-stream", "synthetic.bin", true),
+  };
+}
+
 export function createWhatsAppService({
   client,
   logger = () => {},
@@ -357,6 +481,9 @@ export function createWhatsAppService({
   const sendReservations = [];
   const historyLoads = new Map();
   const historyCoverage = new Map();
+  const attachments = new AttachmentStore({ now, randomId: randomUUID });
+  const mediaReads = new MediaReadStore({ now, randomId: randomUUID });
+  let mediaInFlight = 0;
 
   async function connectionState() {
     return String(await client.getConnectionState());
@@ -366,6 +493,14 @@ export function createWhatsAppService({
     const state = await connectionState();
     if (state !== "CONNECTED") throw new Error(`WhatsApp is not connected (state: ${state}).`);
     return state;
+  }
+
+  async function currentAccountId() {
+    return String(await client.getHostNumber() || "").split("@", 1)[0].replace(/\D/g, "");
+  }
+
+  async function uiOwner(value) {
+    return validateOwnerToken(value);
   }
 
   async function loadedMessages(chatId, includeOwn, boundary, sinceMilliseconds, limit) {
@@ -415,8 +550,11 @@ export function createWhatsAppService({
         has_more: ordered.length > selected.length,
         messages: selected.map(({ message }) => ({
           id: message?.id?._serialized || String(message?.id || ""),
-          from: message?.author?._serialized || message?.from?._serialized || String(message?.from || ""),
-          notifyName: message?.notifyName || message?.senderObj?.formattedName || "",
+          from: message?.author?._serialized || (typeof message?.author === "string" ? message.author : "")
+            || message?.id?.participant?._serialized || (typeof message?.id?.participant === "string" ? message.id.participant : "")
+            || message?.from?._serialized || String(message?.from || ""),
+          notifyName: window.WAPI?.resolveAssistantName?.({ kind: "sender", message })
+            || message?.notifyName || message?.senderObj?.formattedName || "",
           fromMe: Boolean(message?.id?.fromMe || message?.fromMe),
           t: Number(message?.t || message?.timestamp || 0),
           type: String(message?.type || "chat"),
@@ -602,6 +740,32 @@ export function createWhatsAppService({
     sendReservations.push(now());
   }
 
+  function attachmentOwner(value) {
+    if (typeof value !== "string" || !/^[A-Za-z0-9_-]{32,128}$/.test(value)) throw new Error("owner_token is invalid.");
+    return value;
+  }
+
+  async function prepareAttachmentApproval({ chatId, text = "", uploadId, ownerToken }) {
+    const resolvedChatId = boundedString(chatId, { name: "chat_id", required: true, maximum: 256 });
+    const body = boundedString(text, { name: "text", maximum: MAX_MESSAGE_TEXT }) ?? "";
+    const token = attachmentOwner(ownerToken);
+    const metadata = attachments.inspect({ owner_token: token, upload_id: uploadId });
+    if (!metadata.complete) throw new Error("Attachment upload is incomplete.");
+    const chat = await resolveChat(resolvedChatId);
+    if (chat?.canSend === false || chat?.isReadOnly === true) throw new Error("Messages cannot be sent to this chat.");
+    const accountId = String(await client.getHostNumber() || "").split("@", 1)[0].replace(/\D/g, "");
+    if (!accountId) throw new Error("The current WhatsApp account identity is unavailable.");
+    purgeExpiredApprovals();
+    const id = randomUUID();
+    const approval = {
+      id, chatId: chatIdOf(chat), chatTitle: chatTitleOf(chat), chatType: isGroupChat(chat) ? "group" : "direct", accountId,
+      text: body, textHash: createHash("sha256").update(body, "utf8").digest("hex"), uploadId: metadata.upload_id, ownerToken: token,
+      attachment: { name: metadata.name, mime: metadata.mime, size: metadata.size, sha256: metadata.sha256 }, expiresAt: Math.min(now() + APPROVAL_TTL_MS, Date.parse(metadata.expires_at)),
+    };
+    approvals.set(id, approval);
+    return { approval_id: id, recipient: approval.chatTitle, chat_id: approval.chatId, chat_type: approval.chatType, text: body, attachment: approval.attachment, expires_at: new Date(approval.expiresAt).toISOString(), sent: false };
+  }
+
   function requireAutomationPolicy() {
     if (!automationPolicy) throw new Error("Automation policy is unavailable.");
     return automationPolicy;
@@ -640,6 +804,34 @@ export function createWhatsAppService({
   }
 
   const handlers = {
+    async checkAttachmentPreparation(params) {
+      checkedObject(params, [], "checkAttachmentPreparation");
+      await requireConnected();
+      return client.pup(checkAttachmentPreparationProjection);
+    },
+    async uiStatus(params) {
+      checkedObject(params, [], "uiStatus");
+      const status = await handlers.status({});
+      const account = status.connected ? await currentAccountId() : "";
+      if (account) mediaReads.invalidateAccount(account);
+      const attachmentSupport = status.connected ? await client.pup(() => {
+        const root = globalThis.window || globalThis;
+        const get = (name) => { try { return root.require?.(name); } catch { return undefined; } };
+        return {
+          legacy_prepare: typeof root.Store?.MediaCollection === "function" && typeof root.Store.MediaCollection.prototype?.processFiles === "function",
+          legacy_helpers: typeof root.WAPI?.procFiles === "function" && typeof root.WAPI?.base64ImageToFile === "function",
+          modern_prepare: typeof get("WAWebPrepRawMedia")?.prepRawMedia === "function",
+          modern_opaque: typeof get("WAWebMediaOpaqueData")?.createFromData === "function",
+          modern_storage: typeof get("WAWebMediaStorage")?.getOrCreateMediaObject === "function",
+          modern_upload: typeof get("WAWebMediaMmsV4Upload")?.uploadMedia === "function",
+          modern_types: typeof get("WAWebMmsMediaTypes")?.msgToMediaType === "function",
+          modern_send: typeof get("WAWebSendMsgChatAction")?.addAndSendMsgToChat === "function",
+          modern_key: typeof get("WAWebMsgKey")?.newId === "function",
+          message_events: typeof root.Store?.Msg?.on === "function" && typeof root.Store?.Msg?.off === "function",
+        };
+      }).catch(() => null) : null;
+      return { ...status, account_fingerprint: account ? createHash("sha256").update(account, "utf8").digest("hex") : null, attachment_support: attachmentSupport, media_support: { ui_messages: true, profile_picture: true, open_media: true } };
+    },
     async status(params) {
       checkedObject(params, [], "status");
       const state = await connectionState().catch(() => "UNAVAILABLE");
@@ -706,6 +898,111 @@ export function createWhatsAppService({
           ? "The selected chat is loaded through the 30-day window or its beginning; media bytes were not downloaded."
           : `History loading stopped before the 30-day window (${history.stop_reason}); call whatsapp_read_messages again to continue.`,
       };
+    },
+
+    async readUiMessages(params) {
+      const input = checkedObject(params, ["owner_token", "chat_id", "limit", "before", "cursor", "include_own"], "readUiMessages");
+      await uiOwner(input.owner_token);
+      const limit = integerInRange(input.limit, 20, 1, MAX_PAGE_SIZE, "limit");
+      const chatId = boundedString(input.chat_id, { name: "chat_id", required: true, maximum: 256 });
+      const chat = await resolveChat(chatId);
+      const includeOwn = optionalBoolean(input.include_own, "include_own") ?? true;
+      const historyWindowStart = now() - MEDIA_HISTORY_WINDOW_MS;
+      const history = await ensureHistoryWindow(chatIdOf(chat), historyWindowStart);
+      let boundary = decodeMessageCursor(input.cursor);
+      if (input.before !== undefined && input.before !== null) {
+        if (input.cursor !== undefined) throw new Error("before and cursor cannot be combined.");
+        const beforeValue = boundedString(input.before, { name: "before", maximum: 64 });
+        const parsedBefore = Date.parse(beforeValue);
+        if (!Number.isFinite(parsedBefore)) throw new Error("before must be an ISO-8601 timestamp.");
+        boundary = { timestamp: parsedBefore, messageId: null };
+      }
+      const result = await client.pup(uiMessagesProjection, { operation: "readUiMessages", targetChatId: chatIdOf(chat), includeMe: includeOwn, sinceMs: historyWindowStart, beforeMs: boundary?.timestamp ?? null, beforeId: boundary?.messageId ?? null, pageLimit: limit });
+      const page = Array.isArray(result?.messages) ? result.messages : [];
+      const messages = page.map((message) => {
+        const projected = mediaPlaceholder(message);
+        projected.sender = String(message?.notifyName || message?.from || "unknown");
+        projected.timestamp = isoTimestamp(message?.t);
+        return projected;
+      });
+      const oldest = page[0];
+      const oldestTimestamp = oldest ? epochMilliseconds(oldest.t) : null;
+      const oldestId = oldest ? String(oldest.id || "") : "";
+      return { chat: normalizeChat(chat, false), messages, history_complete: Boolean(history.complete), history_window_days: HISTORY_WINDOW_DAYS, history_window_start: new Date(historyWindowStart).toISOString(), history_available_from: history.oldest_ms ? new Date(history.oldest_ms).toISOString() : null, history_load_more_required: !history.complete, history_stop_reason: history.stop_reason, next_cursor: history.complete && result?.has_more && oldestTimestamp && oldestId ? encodeMessageCursor(oldestTimestamp, oldestId) : null };
+    },
+
+    async openMedia(params) {
+      const input = checkedObject(params, ["owner_token", "chat_id", "message_id"], "openMedia");
+      await uiOwner(input.owner_token);
+      const chatId = boundedString(input.chat_id, { name: "chat_id", required: true, maximum: 256 });
+      const messageId = boundedString(input.message_id, { name: "message_id", required: true, maximum: 256 });
+      const accountId = await currentAccountId();
+      if (!accountId) return { available: false, reason: "unavailable" };
+      const chat = await resolveChat(chatId);
+      if (await currentAccountId() !== accountId) return { available: false, reason: "identity_changed" };
+      if (mediaInFlight >= 2) return { available: false, reason: "unavailable" };
+      mediaReads.invalidateAccount(accountId);
+      mediaInFlight += 1;
+      const operation = client.pup(openMediaProjection, { operation: "openMedia", targetChatId: chatIdOf(chat), messageId, expectedAccountId: accountId, sinceMs: now() - MEDIA_HISTORY_WINDOW_MS });
+      const trackedOperation = operation.finally(() => { mediaInFlight -= 1; });
+      let timer;
+      const timeout = new Promise((resolve) => { timer = setTimeout(() => resolve({ status: "unavailable" }), 20_000); timer.unref?.(); });
+      const result = await Promise.race([trackedOperation, timeout]);
+      clearTimeout(timer);
+      if (result?.status !== "ready") return { available: false, reason: result?.status === "identity_changed" ? "identity_changed" : ["metadata_unavailable", "expired", "too_large", "resolver_unavailable", "resolve_failed", "decoder_unavailable", "timeout", "download_failed", "encoding_failed"].includes(result?.reason) ? result.reason : "unavailable", ...(["resolve", "decrypt", "encode"].includes(result?.failure_phase) && ["TypeError", "RangeError", "AbortError", "NetworkError", "Error"].includes(result?.failure_type) ? { failure_phase: result.failure_phase, failure_type: result.failure_type, failure_hints: Array.isArray(result.failure_hints) ? result.failure_hints.filter((word) => ["fetch", "hash", "key", "path", "expired", "decrypt", "upload", "data", "qpl", "signal", "cors", "network", "http", "media", "cdn", "size"].includes(word)) : [], ...(Number.isInteger(result.http_status) && result.http_status >= 100 && result.http_status <= 599 ? { http_status: result.http_status } : {}) } : {}) };
+      const latestAccount = await currentAccountId();
+      if (!latestAccount || latestAccount !== accountId) { mediaReads.invalidateAccount(latestAccount); return { available: false, reason: "identity_changed" }; }
+      const latestChat = await resolveChat(chatId);
+      if (await currentAccountId() !== accountId || chatIdOf(latestChat) !== chatIdOf(chat)) return { available: false, reason: "identity_changed" };
+      let bytes;
+      try {
+        validMime(result.mime);
+        bytes = decodeCanonicalBase64(result.bytes, MAX_MEDIA_READ_BYTES);
+      } catch { return { available: false, reason: "unavailable" }; }
+      return { available: true, ...mediaReads.put({ owner_token: input.owner_token, accountId, name: result.name, mime: result.mime, bytes }) };
+    },
+
+    async readMediaChunk(params) {
+      const input = checkedObject(params, ["owner_token", "media_id", "offset"], "readMediaChunk");
+      await uiOwner(input.owner_token);
+      const accountId = await currentAccountId();
+      if (!accountId) throw new Error("media is unavailable.");
+      mediaReads.invalidateAccount(accountId);
+      return mediaReads.read({ owner_token: input.owner_token, media_id: input.media_id, offset: input.offset, accountId });
+    },
+
+    async getProfilePicture(params) {
+      const input = checkedObject(params, ["owner_token", "chat_id"], "getProfilePicture");
+      await uiOwner(input.owner_token);
+      const chatId = boundedString(input.chat_id, { name: "chat_id", required: true, maximum: 256 });
+      const accountId = await currentAccountId();
+      if (!accountId) return { available: false };
+      const chat = await resolveChat(chatId);
+      if (await currentAccountId() !== accountId) return { available: false, reason: "identity_changed" };
+      const operation = client.pup(profilePictureProjection, { operation: "getProfilePicture", targetChatId: chatIdOf(chat), expectedAccountId: accountId });
+      let timer;
+      const timeout = new Promise((resolve) => { timer = setTimeout(() => resolve({ status: "unavailable" }), 12_000); timer.unref?.(); });
+      const result = await Promise.race([operation, timeout]);
+      clearTimeout(timer);
+      if (result?.status !== "ready") return { available: false, ...(result?.status === "identity_changed" ? { reason: "identity_changed" } : {}) };
+      if (await currentAccountId() !== accountId) return { available: false, reason: "identity_changed" };
+      const latestChat = await resolveChat(chatId);
+      if (await currentAccountId() !== accountId || chatIdOf(latestChat) !== chatIdOf(chat)) return { available: false, reason: "identity_changed" };
+      try {
+        const mime = validMime(result.mime);
+        if (!/^image\/(?:jpeg|png|gif|webp)$/i.test(mime)) throw new Error("unsafe profile mime");
+        const bytes = decodeCanonicalBase64(result.data, MAX_PROFILE_BYTES);
+        return { available: true, mime, data: bytes.toString("base64") };
+      } catch { return { available: false }; }
+    },
+
+    async releaseMedia(params) {
+      const input = checkedObject(params, ["owner_token", "media_id"], "releaseMedia");
+      await uiOwner(input.owner_token);
+      const accountId = await currentAccountId();
+      if (!accountId) throw new Error("media is unavailable.");
+      mediaReads.invalidateAccount(accountId);
+      return mediaReads.release({ owner_token: input.owner_token, media_id: input.media_id, accountId });
     },
 
     async authorizeAutomation(params) {
@@ -833,6 +1130,37 @@ export function createWhatsAppService({
       };
     },
 
+    async beginAttachment(params) {
+      const input = checkedObject(params, ["owner_token", "name", "mime", "size"], "beginAttachment");
+      const result = attachments.begin({
+        owner_token: attachmentOwner(input.owner_token),
+        name: boundedString(input.name, { name: "name", required: true, maximum: MAX_ATTACHMENT_NAME }),
+        mime: boundedString(input.mime, { name: "mime", required: true, maximum: 127 }),
+        size: integerInRange(input.size, 0, 1, MAX_ATTACHMENT_BYTES, "size"),
+      });
+      return { ...result, max_chunk_bytes: 192 * 1024 };
+    },
+
+    async appendAttachment(params) {
+      const input = checkedObject(params, ["owner_token", "upload_id", "offset", "data"], "appendAttachment");
+      return attachments.append({
+        owner_token: attachmentOwner(input.owner_token),
+        upload_id: boundedString(input.upload_id, { name: "upload_id", required: true, maximum: 128 }),
+        offset: integerInRange(input.offset, 0, 0, MAX_ATTACHMENT_BYTES, "offset"),
+        data: boundedString(input.data, { name: "data", required: true, maximum: 300_000 }),
+      });
+    },
+
+    async cancelAttachment(params) {
+      const input = checkedObject(params, ["owner_token", "upload_id"], "cancelAttachment");
+      return attachments.cancel({ owner_token: attachmentOwner(input.owner_token), upload_id: input.upload_id });
+    },
+
+    async prepareAttachment(params) {
+      const input = checkedObject(params, ["owner_token", "chat_id", "text", "upload_id"], "prepareAttachment");
+      return prepareAttachmentApproval({ chatId: input.chat_id, text: input.text, uploadId: input.upload_id, ownerToken: input.owner_token });
+    },
+
     async sendPrepared(params) {
       const input = checkedObject(params, ["approval_id"], "sendPrepared");
       const approvalId = boundedString(input.approval_id, { name: "approval_id", required: true, maximum: 128 });
@@ -849,6 +1177,22 @@ export function createWhatsAppService({
       await requireConnected();
       const accountId = String(await client.getHostNumber() || "").split("@", 1)[0].replace(/\D/g, "");
       if (accountId !== approval.accountId) throw new Error("WhatsApp account changed after approval; prepare the message again.");
+      if (approval.uploadId) {
+        const attachment = attachments.consume({ owner_token: approval.ownerToken, upload_id: approval.uploadId });
+        if (attachment.name !== approval.attachment.name || attachment.mime !== approval.attachment.mime || attachment.size !== approval.attachment.size || attachment.sha256 !== approval.attachment.sha256) {
+          throw new Error("Prepared attachment integrity check failed.");
+        }
+        const dataUrl = `data:${attachment.mime};base64,${attachment.bytes.toString("base64")}`;
+        const result = await client.pup(sendExistingAttachmentProjection, {
+          operation: "sendExistingAttachment", targetChatId: approval.chatId, expectedTitle: approval.chatTitle,
+          expectedGroup: approval.chatType === "group", expectedAccountId: approval.accountId, dataUrl,
+          name: attachment.name, mime: attachment.mime, caption: approval.text,
+        });
+        if (result?.status === "identity_changed") throw new Error("Chat identity changed or account changed after approval; prepare the message again.");
+        if (result?.status === "send_unavailable") throw new Error("WhatsApp media sending is unavailable in the current web client.");
+        if (result?.status !== "sent" || typeof result?.message_id !== "string" || !result.message_id) throw new Error("WhatsApp did not confirm the attachment send operation.");
+        return { sent: true, chat_id: approval.chatId, recipient: approval.chatTitle, message_id: result.message_id, attachment: approval.attachment };
+      }
       const result = await client.pup(sendExistingTextProjection, {
         operation: "sendExistingText",
         targetChatId: approval.chatId,
