@@ -18,6 +18,8 @@ jobs:
           node-version: 24
       - run: npm ci --ignore-scripts --no-audit --no-fund
         working-directory: plugins/whatsapp-assistant/web
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: online
       - run: npm run ui:build
       - run: git diff --exit-code -- plugins/whatsapp-assistant/web/dist/index.html plugins/whatsapp-assistant/web/licenses
       - run: npx playwright install --with-deps chromium
