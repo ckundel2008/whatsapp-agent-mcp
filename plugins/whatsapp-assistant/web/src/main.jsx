@@ -56,6 +56,7 @@ function Surface({ controller }) {
     return () => clearTimeout(timer);
   }, [search, controller]);
   const locked = s.sendBusy || s.prepareBusy || s.fileBusy;
+  const readOnly = s.status?.read_only === true;
   const error = s.mediaError || s.error || s.statusError;
   const choose = (chat) => { controller.select(chat); setShowChats(false); };
   const mediaOpener = useRef(null);
@@ -124,16 +125,17 @@ function Surface({ controller }) {
             {s.mediaBusy && <p className="feedback" role="status">Medium wird geladen …</p>}
             {error && <p className="feedback error" role="alert" data-media-diagnostic={s.mediaError ? s.mediaDiagnostic || undefined : undefined}>{error}</p>}
             {s.notice && <p className="feedback success" role="status">{s.notice}</p>}
+            {readOnly && <p className="feedback" role="status" data-testid="read-only-notice">Nur lesen: Antworten und Anhänge sind für diese Verbindung deaktiviert.</p>}
             {s.attachment && <div className="attachment-card" data-testid="attachment-draft">
               {s.attachment.preview ? <img src={s.attachment.preview} alt="" className="attachment-preview"/> : <span className="attachment-file" aria-hidden="true"><Icon name="paperclip"/></span>}
               <span className="attachment-details"><strong>{s.attachment.name}</strong><small>{s.attachment.mime || "Datei"} · {(s.attachment.size / (1024 * 1024)).toFixed(2)} MiB</small></span>
               <button className="icon-button" aria-label="Anhang entfernen" title="Anhang entfernen" onClick={() => controller.removeAttachment()} disabled={locked}><Icon name="close"/></button>
             </div>}
             {fileError && <p className="feedback error" role="alert">{fileError}</p>}
-            <textarea aria-label="Antwort" placeholder="Antwort schreiben …" maxLength={10000} value={s.draft} onChange={(e) => controller.setDraft(e.target.value)} disabled={locked || s.chat.can_send === false}/>
-            <div className="composer-footer"><p><Icon name="info" size={17}/><span>Nachrichten der letzten 30 Tage.{s.chat.can_send === false ? " Dieser Chat erlaubt keinen Versand." : ""}</span></p>
-              <div className="composer-buttons"><label className="secondary attach-button" title="Bild oder Datei anhängen"><Icon name="paperclip"/><span>Anhang</span><input data-testid="attachment-input" type="file" hidden disabled={locked || s.chat.can_send === false} onChange={async (e) => { const file = e.target.files?.[0]; e.target.value = ""; if (!file) return; setFileError(""); try { await controller.setAttachment(file); } catch (error) { setFileError(error instanceof Error ? error.message : "Die Datei konnte nicht gelesen werden."); } }}/></label>
-              <button className="primary" onClick={() => controller.prepare()} disabled={locked || (!s.draft.trim() && !s.attachment) || s.sendUnknown || s.chat.can_send === false || !s.status?.connected}><Icon name="send"/>{s.prepareBusy ? "Wird vorbereitet …" : s.sendBusy ? "Wird gesendet …" : "Antwort prüfen"}</button></div>
+            <textarea aria-label="Antwort" placeholder="Antwort schreiben …" maxLength={10000} value={s.draft} onChange={(e) => controller.setDraft(e.target.value)} disabled={locked || readOnly || s.chat.can_send === false}/>
+            <div className="composer-footer"><p><Icon name="info" size={17}/><span>Nachrichten der letzten 30 Tage.{readOnly ? " Nur lesen." : s.chat.can_send === false ? " Dieser Chat erlaubt keinen Versand." : ""}</span></p>
+              <div className="composer-buttons"><label className="secondary attach-button" title="Bild oder Datei anhängen"><Icon name="paperclip"/><span>Anhang</span><input data-testid="attachment-input" type="file" hidden disabled={locked || readOnly || s.chat.can_send === false} onChange={async (e) => { const file = e.target.files?.[0]; e.target.value = ""; if (!file) return; setFileError(""); try { await controller.setAttachment(file); } catch (error) { setFileError(error instanceof Error ? error.message : "Die Datei konnte nicht gelesen werden."); } }}/></label>
+              <button className="primary" onClick={() => controller.prepare()} disabled={locked || readOnly || (!s.draft.trim() && !s.attachment) || s.sendUnknown || s.chat.can_send === false || !s.status?.connected}><Icon name="send"/>{s.prepareBusy ? "Wird vorbereitet …" : s.sendBusy ? "Wird gesendet …" : "Antwort prüfen"}</button></div>
             </div>
           </section>
         </>}

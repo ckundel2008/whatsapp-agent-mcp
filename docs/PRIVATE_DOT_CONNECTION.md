@@ -144,6 +144,53 @@ Chats. Die Suche lädt jeweils eine Seite und liefert keine Nachrichtenvorschau.
 Nach Aktivierung des neuen Tunnelprofils muss ChatGPT die fünf Werkzeuge neu
 erkennen. Die öffentliche OAuth-Bridge übernimmt diese privaten Flags nicht.
 
+### Optionale private Oberfläche
+
+Die grafische Oberfläche ist ein zusätzlicher, UI-only MCP-App-Einstieg. Sie
+wird nur für ein neues oder bewusst angepasstes privates Profil mit
+`allowUi: true` veröffentlicht. Bestehende Profile haben standardmäßig
+`allowUi: false`; ein Update aktiviert die Oberfläche daher nicht heimlich.
+Für ein neues, kontogebundenes Profil kann der vorhandene Einrichtungsschritt
+mit `--allow-ui` ergänzt werden, beispielsweise:
+
+```sh
+node online/private-setup.mjs --all-chats --allow-send --allow-ui --output /ABSOLUTER/PRIVATER/PFAD/private-mcp-ui.json
+```
+
+Der Ausgabepfad muss neu sein; vorhandene Konfigurationen werden nicht überschrieben.
+Die private Ressource besitzt eine eigene versionierte URI, damit der Host
+keine zwischengespeicherte lokale Oberfläche ohne UI-Sitzungsprüfung verwendet.
+Bei einem stdio-Tunnel muss der Host den MCP-Handshake vollständig abschließen.
+Falls der native UI-Aufruf `mcp_initialization_required` meldet, unterstützt
+der offizielle Tunnel-Client die Option
+`mcp.stdio_send_initialized_notification: true` im privaten Profil beziehungsweise
+`MCP_STDIO_SEND_INITIALIZED_NOTIFICATION=true` beim Start. Sie ergänzt erst
+nach einem erfolgreichen `initialize` die Benachrichtigung
+`notifications/initialized`; der Initialisierungsschutz bleibt aktiv. Profil
+vorher sichern und nach einem verwalteten `runtimes connect` die gespeicherte
+Option erneut prüfen, weil das Profil dabei neu erzeugt werden kann.
+Siehe [offizielle Konfiguration](https://github.com/openai/tunnel-client/blob/v0.0.15/docs/configuration.md#stdio-initialized-notification-shim-optional).
+Versandaktionen werden wegen eines solchen Fehlers niemals automatisch wiederholt.
+Die Ressource und die UI-Werkzeuge verwenden dieselbe lokale Aktionslogik wie
+der Textzugang, geben Anzeigeinhalte aber als private App-Metadaten zurück.
+Nur ausdrücklich ausgewählte Nachrichten dürfen für Zusammenfassung oder
+Antwortentwurf in den Modellkontext gelangen.
+
+Jede UI-Sitzung besitzt eigene Auswahl-, Entwurfs- und Medienhandles. Vor und
+nach jeder Aktion wird das gebundene WhatsApp-Konto geprüft; Ergebnisse eines
+zwischenzeitlich verlassenen Chats oder geänderten Kontos werden verworfen.
+Die Suche und Historie bleiben im konfigurierten Kontoumfang und im
+30-Tage-Fenster. Dateien und geöffnete eingehende Medien sind auf 16 MiB
+begrenzt und werden nur nach ausdrücklichem Klick gelesen. Sie werden nicht
+automatisch an das Modell übertragen.
+
+Text- und Dateiversand teilen die dauerhafte Bestätigungsgrenze: Empfänger,
+vollständiger Text beziehungsweise Caption sowie bei Dateien Name, MIME-Typ,
+Größe und Prüfsumme müssen beim abschließenden „Jetzt senden“ unverändert
+sein. Änderungen, Ablauf, Kontowechsel oder ein unklares Ergebnis führen zu
+einer neuen Vorbereitung beziehungsweise zu einer dauerhaften Sperre gegen
+automatische Wiederholung.
+
 `whatsapp_prepare_send` liefert den vollständigen Text, den konkreten Empfänger
 und eine höchstens zehn Minuten gültige Vorbereitung. Danach muss der Dot eine
 **neue separate Bestätigung** des Nutzers abwarten. Erst

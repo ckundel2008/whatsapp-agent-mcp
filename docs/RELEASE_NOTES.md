@@ -1,5 +1,32 @@
 # Release notes
 
+## 0.3.1 — private MCP App UI bridge (2026-10-08)
+
+This candidate adds the private Dot UI bridge to the existing bundled UI. The
+MCP App resource and UI-only actions are exposed only when the private profile
+sets `allowUi: true`; existing profiles remain UI-disabled by default. UI
+results stay in private app metadata, and the model receives content only
+after an explicit user selection. The bridge isolates UI contexts, binds the
+same account scope before and after each action, and discards results from a
+chat or account that is no longer current.
+
+Text and file replies use the same durable confirmation boundary: the exact
+account, recipient, complete caption/text and, for a file, name, MIME type,
+size and digest must still match at the final send. User-selected files and
+opened incoming media are capped at 16 MiB, remain in bounded private UI/
+daemon memory, and are never handed to the model automatically. Existing
+media appears only after an explicit open/click action. On 2026-10-08 the
+native ChatGPT MCP App opened through the plugin UI, rendered the German
+interface and showed connected status. This check did not read a chat, load
+history, open media or send through the native UI. Native Codex rendering and
+native UI history/media/send remain unverified; live media delivery remains
+unverified until it is checked in the real host.
+
+The private tunnel remains personal and account-bound. It does not become a
+public HTTPS MCP endpoint or a public plugin-directory submission. No account
+linking, service start, chat read or message send occurs merely by installing
+this candidate.
+
 ## 0.3.0 — preview candidate, local publication preparation (2026-10-02)
 
 This candidate adds a native MCP App UI path with an explicit local loopback fallback for selected-chat search, bounded history, and separately confirmed replies. It has six model-facing tools and 13 UI-only actions. The bridge stays local to one macOS user session and has no cloud relay or public MCP endpoint.

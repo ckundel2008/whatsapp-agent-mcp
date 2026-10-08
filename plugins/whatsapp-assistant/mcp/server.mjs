@@ -8,7 +8,8 @@ import { pathToFileURL } from "node:url";
 import { UI_RESOURCE_URI, UI_TOOL_NAMES, dispatchUiTool, uiTools } from "./ui-service.mjs";
 
 const SERVER_NAME = "WhatsApp Assistant";
-const SERVER_VERSION = "0.3.0";
+const SERVER_VERSION = "0.3.1";
+export const UI_ICONS = Object.freeze([{ src: `data:image/svg+xml;base64,${readFileSync(new URL('../assets/sidebar-icon.svg', import.meta.url)).toString('base64')}`, mimeType: 'image/svg+xml', sizes: ['20x20'] }]);
 const LATEST_PROTOCOL_VERSION = "2025-11-25";
 const SUPPORTED_PROTOCOL_VERSIONS = new Set([LATEST_PROTOCOL_VERSION, "2025-06-18", "2024-11-05"]);
 const appRoot = process.env.WHATSAPP_ASSISTANT_HOME || path.join(homedir(), "Library", "Application Support", "WhatsApp Assistant");
@@ -137,7 +138,8 @@ export const tools = [
 
 export const openUiTool = Object.freeze({
   name: "whatsapp_open_ui",
-  title: "Open WhatsApp interface",
+  title: "WhatsApp-Chats",
+  icons: UI_ICONS,
   description: "Open the private local WhatsApp interface.",
   inputSchema: { type: "object", properties: {}, additionalProperties: false },
   annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
@@ -224,7 +226,7 @@ async function handle(message) {
     result(id, {
       protocolVersion: SUPPORTED_PROTOCOL_VERSIONS.has(requestedVersion) ? requestedVersion : LATEST_PROTOCOL_VERSION,
       capabilities: { tools: {}, prompts: {}, resources: {} },
-      serverInfo: { name: SERVER_NAME, version: SERVER_VERSION },
+      serverInfo: { name: SERVER_NAME, version: SERVER_VERSION, icons: UI_ICONS },
       instructions: SAFETY_INSTRUCTIONS,
     });
     return;

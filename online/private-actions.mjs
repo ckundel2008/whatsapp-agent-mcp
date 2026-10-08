@@ -4,9 +4,18 @@ import { callDaemon } from "../plugins/whatsapp-assistant/mcp/server.mjs";
 
 const TTL = 10 * 60 * 1000;
 const MAX_PENDING = 100;
+const MAX_ATTACHMENT_BYTES = 16 * 1024 * 1024;
+const validAttachmentName = (value) => typeof value === "string" && value.length >= 1 && value.length <= 255 && !/[\/\\\x00-\x1f\x7f]/.test(value) && value !== "." && value !== "..";
+const validAttachmentMime = (value) => typeof value === "string" && value.length >= 3 && value.length <= 127 && /^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/.test(value);
 const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const fail = (message, code = "REQUEST_FAILED") => Object.assign(new Error(message), { code });
 const withReservation = (error, reservation_id) => Object.assign(error, { reservation_id });
+const ownerOf = (context = {}) => {
+  if (context.uiOwner === undefined) return "model";
+  if (typeof context.uiOwner !== "string" || !context.uiOwner.trim() || context.uiOwner.length > 256) throw fail("Request failed.", "INVALID_ARGUMENTS");
+  return `ui:${context.uiOwner}`;
+};
+const attachmentKey = (accountFingerprint, item) => `${accountFingerprint}\0${item.chat_id}\0${item.text}\0${item.attachment.sha256}\0${item.attachment.name}\0${item.attachment.mime}\0${item.attachment.size}`;
 
 export function createPrivateActions({ dispatch = callDaemon, allowedChatIds = [], allowAllChats = false, allowSending = false, expectedAccountFingerprint, now = Date.now, sendLedger } = {}) {
   if (typeof dispatch !== "function" || typeof allowAllChats !== "boolean" || typeof allowSending !== "boolean" || !Array.isArray(allowedChatIds) || allowedChatIds.length > 100 || allowedChatIds.some((id) => typeof id !== "string" || !id.trim() || id.trim() !== id || id.length > 256) || new Set(allowedChatIds).size !== allowedChatIds.length) throw fail("Invalid action configuration.", "INVALID_CONFIG");
@@ -24,7 +33,7 @@ export function createPrivateActions({ dispatch = callDaemon, allowedChatIds = [
     const options = remaining === undefined ? undefined : { timeoutMs: Math.min(55_000, remaining) };
     const work = Promise.resolve().then(() => dispatch(method, params, options));
     if (remaining === undefined) return work;
-    let timer; try { return await Promise.race([work, new Promise((_, reject) => { timer = setTimeout(() => reject(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN")), remaining); })]); } finally { clearTimeout(timer); }
+    let timer; try { return await Promise.race([work, new Promise((_, reject) => { timer = setTimeout(() => reject(fail("Request failed. Check WhatsApp before trying again.", method === "sendPrepared" ? "DELIVERY_UNKNOWN" : "REQUEST_FAILED")), remaining); })]); } finally { clearTimeout(timer); }
   };
   const account = async (context) => {
     if (!expectedAccountFingerprint) throw fail("Request failed.", "ACCOUNT_UNBOUND");
@@ -37,42 +46,53 @@ export function createPrivateActions({ dispatch = callDaemon, allowedChatIds = [
   const scoped = (id) => allowAllChats || allowed.has(id);
   const request = async (method, params = {}, context = {}) => {
     if (!allowSending) throw fail("Request failed.", "WRITE_DISABLED");
-    if (method !== "prepareSend" && method !== "sendPrepared") throw fail("Request failed.", "METHOD_NOT_ALLOWED");
+    if (method !== "prepareSend" && method !== "prepareAttachment" && method !== "sendPrepared") throw fail("Request failed.", "METHOD_NOT_ALLOWED");
     if (!isObject(params)) throw fail("Request failed.", "INVALID_ARGUMENTS");
-    if (method === "prepareSend") {
-      if (Object.keys(params).some((k) => !["chat_id", "text"].includes(k)) || typeof params.chat_id !== "string" || !params.chat_id.trim() || typeof params.text !== "string" || !params.text.length || params.text.length > 10000 || !scoped(params.chat_id)) throw fail("Request failed.", "INVALID_ARGUMENTS");
+    const owner = ownerOf(context);
+    if (method === "prepareSend" || method === "prepareAttachment") {
+      const attachment = method === "prepareAttachment";
+      if (attachment && typeof context.uiOwner !== "string") throw fail("Request failed.", "INVALID_ARGUMENTS");
+      const keys = attachment ? ["chat_id", "text", "upload_id"] : ["chat_id", "text"];
+      if (Object.keys(params).some((k) => !keys.includes(k)) || typeof params.chat_id !== "string" || !params.chat_id.trim() || typeof params.text !== "string" || (!attachment && !params.text.length) || params.text.length > 10000 || (attachment && (typeof params.upload_id !== "string" || !params.upload_id.trim() || params.upload_id.length > 128)) || !scoped(params.chat_id)) throw fail("Request failed.", "INVALID_ARGUMENTS");
       const textKey = createHash("sha256").update(`${params.chat_id}\0${params.text}`, "utf8").digest("hex");
       const durableKey = `${expectedAccountFingerprint}\0${params.chat_id}\0${params.text}`;
       const reservation_id = createHash("sha256").update(durableKey, "utf8").digest("hex");
       for (const [id, item] of pending) if (item.expires_at <= now()) pending.delete(id);
-      if (unknown.has(textKey) || activeSending.has(textKey) || ledger.has(durableKey)) throw withReservation(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN"), reservation_id);
+      if (!attachment && (unknown.has(textKey) || activeSending.has(textKey) || ledger.has(durableKey))) throw withReservation(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN"), reservation_id);
       await account(context);
-      const result = await daemon("prepareSend", params, context);
+      const daemonParams = attachment ? { ...params, owner_token: context.uiOwner } : params;
+      const result = await daemon(attachment ? "prepareAttachment" : "prepareSend", daemonParams, context);
       checkContext(context);
-      if (ledger.has(durableKey)) throw withReservation(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN"), reservation_id);
       if (!isObject(result) || typeof result.approval_id !== "string" || !result.approval_id || result.chat_id !== params.chat_id || typeof result.recipient !== "string" || typeof result.text !== "string" || result.text !== params.text || !["group", "direct"].includes(result.chat_type) || typeof result.expires_at !== "string") throw fail("Request failed.", "PREPARATION_INVALID");
+      if (attachment && (!isObject(result.attachment) || !validAttachmentName(result.attachment.name) || !validAttachmentMime(result.attachment.mime) || !Number.isInteger(result.attachment.size) || result.attachment.size < 1 || result.attachment.size > MAX_ATTACHMENT_BYTES || typeof result.attachment.sha256 !== "string" || !/^[a-f0-9]{64}$/.test(result.attachment.sha256))) throw fail("Request failed.", "PREPARATION_INVALID");
+      const itemAttachment = attachment ? { name: result.attachment.name, mime: result.attachment.mime, size: result.attachment.size, sha256: result.attachment.sha256 } : undefined;
+      const effectiveDurableKey = attachment ? attachmentKey(expectedAccountFingerprint, { chat_id: result.chat_id, text: result.text, attachment: itemAttachment }) : durableKey;
+      const effectiveReservation = createHash("sha256").update(effectiveDurableKey, "utf8").digest("hex");
+      if (ledger.has(effectiveDurableKey)) throw withReservation(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN"), effectiveReservation);
       const expires = Date.parse(result.expires_at); if (!Number.isFinite(expires) || expires <= now() || expires > now() + TTL) throw fail("Request failed.", "PREPARATION_INVALID");
       await account(context);
-      for (const [id, item] of pending) if (item.chat_id === params.chat_id) pending.delete(id);
+      for (const [id, item] of pending) if (item.owner === owner && item.chat_id === params.chat_id) pending.delete(id);
       while (pending.size >= MAX_PENDING) pending.delete(pending.keys().next().value);
-      const id = randomUUID(); pending.set(id, { daemon_id: result.approval_id, chat_id: result.chat_id, recipient: result.recipient, text: result.text, chat_type: result.chat_type, expires_at: expires });
-      return { approval_id: id, recipient: result.recipient, chat_id: result.chat_id, chat_type: result.chat_type, text: result.text, expires_at: result.expires_at, sent: false, safety: "Review the exact recipient and full text, then provide a new separate confirmation before sending." };
+      const id = randomUUID(); pending.set(id, { daemon_id: result.approval_id, owner, chat_id: result.chat_id, recipient: result.recipient, text: result.text, chat_type: result.chat_type, attachment: itemAttachment, expires_at: expires });
+      return { approval_id: id, recipient: result.recipient, chat_id: result.chat_id, chat_type: result.chat_type, text: result.text, ...(itemAttachment ? { attachment: itemAttachment } : {}), expires_at: result.expires_at, sent: false, safety: "Review the exact recipient, complete text and attachment, then provide a new separate confirmation before sending." };
     }
     if (Object.keys(params).some((key) => !["approval_id", "confirmed"].includes(key)) || typeof params.approval_id !== "string" || !params.approval_id.trim()) throw fail("Request failed.", "INVALID_ARGUMENTS");
     if (params.confirmed !== true) throw fail("Request failed.", "CONFIRMATION_REQUIRED");
-    const item = pending.get(params.approval_id); if (!item || item.expires_at <= now()) { pending.delete(params.approval_id); throw fail("Request failed.", "APPROVAL_INVALID"); }
+    const item = pending.get(params.approval_id); if (!item || item.expires_at <= now() || item.owner !== owner) { if (item?.expires_at <= now()) pending.delete(params.approval_id); throw fail("Request failed.", "APPROVAL_INVALID"); }
     pending.delete(params.approval_id);
-    const textKey = createHash("sha256").update(`${item.chat_id}\0${item.text}`, "utf8").digest("hex");
-    const durableKey = `${expectedAccountFingerprint}\0${item.chat_id}\0${item.text}`;
+    const textKey = createHash("sha256").update(item.attachment
+      ? `${item.chat_id}\0${item.text}\0${item.attachment.sha256}\0${item.attachment.name}\0${item.attachment.mime}\0${item.attachment.size}`
+      : `${item.chat_id}\0${item.text}`, "utf8").digest("hex");
+    const durableKey = item.attachment ? attachmentKey(expectedAccountFingerprint, item) : `${expectedAccountFingerprint}\0${item.chat_id}\0${item.text}`;
     const reservation_id = createHash("sha256").update(durableKey, "utf8").digest("hex");
     if (!ledger.reserve(durableKey)) { unknown.add(textKey); throw withReservation(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN"), reservation_id); }
     activeSending.add(textKey);
     try { await account(context); } catch (error) { activeSending.delete(textKey); ledger.release(durableKey); throw error; }
     let result; try { result = await daemon("sendPrepared", { approval_id: item.daemon_id }, context); } catch { activeSending.delete(textKey); unknown.add(textKey); throw withReservation(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN"), reservation_id); }
     try { await account(context); } catch { activeSending.delete(textKey); unknown.add(textKey); throw withReservation(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN"), reservation_id); }
-    if (!isObject(result) || result.sent !== true || result.chat_id !== item.chat_id || result.recipient !== item.recipient || typeof result.message_id !== "string" || !result.message_id) { activeSending.delete(textKey); unknown.add(textKey); throw withReservation(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN"), reservation_id); }
+    if (!isObject(result) || result.sent !== true || result.chat_id !== item.chat_id || result.recipient !== item.recipient || typeof result.message_id !== "string" || !result.message_id || (item.attachment && (!isObject(result.attachment) || result.attachment.name !== item.attachment.name || result.attachment.mime !== item.attachment.mime || result.attachment.size !== item.attachment.size || result.attachment.sha256 !== item.attachment.sha256))) { activeSending.delete(textKey); unknown.add(textKey); throw withReservation(fail("Request failed. Check WhatsApp before trying again.", "DELIVERY_UNKNOWN"), reservation_id); }
     activeSending.delete(textKey);
-    return { sent: true, chat_id: item.chat_id, recipient: item.recipient, message_id: result.message_id, reservation_id };
+    return { sent: true, chat_id: item.chat_id, recipient: item.recipient, message_id: result.message_id, ...(item.attachment ? { attachment: item.attachment } : {}), reservation_id };
   };
   return request;
 }
