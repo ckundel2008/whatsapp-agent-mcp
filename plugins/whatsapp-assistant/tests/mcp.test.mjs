@@ -156,6 +156,12 @@ test("stdio server completes MCP initialize and tool listing", async () => {
   const byId = (id) => responses.find((response) => response.id === id);
   assert.equal(byId(1).result.serverInfo.name, "WhatsApp Assistant");
   assert.equal(byId(1).result.serverInfo.version, "0.3.1");
+  const entrypoint = byId(2).result.tools.find((tool) => tool.name === "whatsapp_open_ui");
+  assert.equal(entrypoint.title, "WhatsApp-Chats");
+  assert.equal(entrypoint.icons[0].mimeType, "image/svg+xml");
+  assert.deepEqual(entrypoint.icons[0].sizes, ["20x20"]);
+  assert.match(Buffer.from(entrypoint.icons[0].src.split(',')[1], 'base64').toString(), /stroke="currentColor"/);
+  assert.deepEqual(byId(1).result.serverInfo.icons, entrypoint.icons);
   assert.equal(byId(1).result.capabilities.prompts !== undefined, true);
   assert.equal(byId(2).result.tools.length, 20);
   assert.equal(byId(2).result.tools.find((tool) => tool.name === "whatsapp_open_ui")._meta.ui.resourceUri, "ui://whatsapp-assistant/app.html");
