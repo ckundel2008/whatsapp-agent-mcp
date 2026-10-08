@@ -130,6 +130,31 @@ test("native SDK initializes and only explicit selection reaches model messages"
   expect((await inspect(request)).calls.filter((c) => c.method === "sendPrepared")).toHaveLength(1);
 });
 
+test("native private MCP app bootstraps a UI session and keeps preparation separate from sending", async ({ page, request }) => {
+  await page.goto("http://127.0.0.1:8767/");
+  const app = page.frameLocator("#app");
+  await expect(app.getByRole("status").filter({ hasText: "Verbunden" })).toBeVisible();
+  await app.getByRole("button", { name: "Chats anzeigen" }).click();
+  await app.getByRole("textbox", { name: "Chats suchen" }).fill("Nord");
+  await expect(app.getByRole("button", { name: /Projekt Nord/ })).toBeVisible();
+  await app.getByRole("button", { name: /Projekt Nord/ }).click();
+  await app.getByRole("textbox", { name: "Antwort", exact: true }).fill("Native Session Test");
+  await app.getByRole("button", { name: "Antwort prüfen" }).click();
+  const beforeConfirm = await inspect(request);
+  expect(beforeConfirm.shares).toHaveLength(0);
+  expect(beforeConfirm.calls.filter((call) => call.method === "sendPrepared")).toHaveLength(0);
+  const connectCall = beforeConfirm.nativeCalls.find((call) => call.name === "whatsapp_ui_connect");
+  expect(connectCall && Object.keys(connectCall.args).length === 0).toBe(true);
+  const session = beforeConfirm.nativeCalls.find((call) => call.name === "whatsapp_ui_status")?.args.ui_session;
+  expect(session).toMatch(/^[A-Za-z0-9_-]{43}$/);
+  expect(beforeConfirm.nativeCalls.filter((call) => call.name.startsWith("whatsapp_ui_") && call.name !== "whatsapp_ui_connect" && call.name !== "whatsapp_ui_disconnect").every((call) => call.args.ui_session === session)).toBe(true);
+  await app.getByRole("button", { name: "Jetzt senden" }).click();
+  await expect(app.getByText("Versand von WhatsApp bestätigt.")).toBeVisible();
+  const afterConfirm = await inspect(request);
+  expect(afterConfirm.calls.filter((call) => call.method === "sendPrepared")).toHaveLength(1);
+  expect(afterConfirm.shares).toHaveLength(0);
+});
+
 test("native SDK attachment-only flow prepares the exact file before explicit send", async ({ page, request }) => {
   await page.goto("http://127.0.0.1:8767/");
   const app = page.frameLocator("#app");

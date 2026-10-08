@@ -10,8 +10,11 @@ Für den eigenen persönlichen Dot wird inzwischen der kürzere offizielle
 **Secure MCP Tunnel** vorbereitet: ein eigener stdio-Server ohne öffentliche
 Domain oder eigenen OAuth-Anbieter. Er ist standardmäßig rein lesend; explizite
 private Flags erlauben alle bestehenden Chats und den zweistufig bestätigten
-Textversand. Ein dauerhaftes privates Ledger sperrt unklare Zustellungen auch
-über Neustarts hinweg. Die öffentlichen HTTP-Werkzeuge bleiben rein lesend.
+Textversand. Mit `allowUi: true` kann derselbe private Tunnel zusätzlich die
+MCP-App-Ressource und UI-only Aktionen freigeben; der Standard bleibt
+`allowUi: false`, damit bestehende Profile unverändert bleiben. Ein dauerhaftes
+privates Ledger sperrt unklare Zustellungen auch über Neustarts hinweg. Die
+öffentlichen HTTP-Werkzeuge bleiben rein lesend.
 [Privaten Dot verbinden](../docs/PRIVATE_DOT_CONNECTION.md)
 Die nachfolgende HTTP-/OAuth-Architektur bleibt der getrennte öffentliche Pilot.
 
@@ -63,6 +66,11 @@ OAuth-Anbieter und keinen tatsächlichen Dot.
   keine automatische Wiederholung oder spätere Wiedergabe alter Anfragen.
 - Status unterscheidet Gateway, Bridge und WhatsApp. Fehlertexte enthalten
   keine Daemon-Ausnahmen, Kontodaten oder Token. Nachrichten bleiben Textdaten.
+- Private UI-Aktionen sind an eine einzelne Sitzung und das gebundene Konto
+  gebunden. App-Metadaten bleiben im UI; das Modell erhält nur ausdrücklich
+  ausgewählte Inhalte. Bilder und Dateien werden nur nach einem Klick gelesen,
+  sind auf 16 MiB begrenzt und werden nicht automatisch in den Modellkontext
+  übertragen.
 
 Das Gateway bindet ausschließlich an `127.0.0.1`. Für späteren öffentlichen
 Betrieb muss ein ausdrücklich eingerichteter HTTPS-Reverse-Proxy den ursprünglichen
@@ -161,11 +169,12 @@ Siehe die [Pilot-Abnahme](../docs/ONLINE_PILOT_ACCEPTANCE.md).
 
 ## Weitere Etappen
 
-Offen sind öffentliche Pairing-/Kontoeinrichtung, native MCP-App und angemeldete
-Weboberfläche für den Remote-Pfad, dauerhafte Verwaltung und Widerruf,
+Offen sind öffentliche Pairing-/Kontoeinrichtung, native Host-Abnahme und
+angemeldete Weboberfläche für den Remote-Pfad, dauerhafte Verwaltung und Widerruf,
 Ereignisabonnements mit MCP 2.0 `2026-07-28`, menschliche Versandfreigabe,
 Betrieb sowie öffentliche Einreichung. Der aktuelle Server bewirbt keine Events
-oder native UI. Keine lokale Benutzer-Sitzung wird automatisch hochgeladen.
+oder native UI ohne explizites `allowUi`. Keine lokale Benutzer-Sitzung wird
+automatisch hochgeladen.
 
 Gezielt gelesene Inhalte würden über Gateway und OpenAI verarbeitet. TLS schützt
 die Transportstrecken; das Gateway kann angefragte Inhalte lesen. Die vorhandenen

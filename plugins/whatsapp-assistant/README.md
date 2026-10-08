@@ -32,6 +32,23 @@ Selected messages can be sent to the model explicitly for summary or drafting
 in a native host; in a browser panel use the copy action. See [UI acceptance](../../docs/UI_ACCEPTANCE.md),
 [support](docs/SUPPORT.md) and [terms](docs/TERMS.md).
 
+### Private Dot UI
+
+The private Secure MCP Tunnel can expose this same MCP App resource and its
+UI-only actions when its local profile explicitly contains `allowUi: true`.
+The default remains `false`, so existing Dot profiles keep their text-tool
+behavior and do not gain a UI or media path during an update. The UI session is
+isolated from other sessions and is checked against the bound WhatsApp account
+before and after each action. Search and history are still limited to the
+configured account scope and the existing 30-day boundary.
+
+UI actions return private app metadata rather than model text. A user must
+explicitly select content before a summary or draft hand-off. Selected files
+and opened incoming media are limited to 16 MiB and stay in bounded memory;
+they are not transferred to the model automatically. Text and file sends share
+the same durable confirmation and duplicate-send protection. Native host
+rendering and live media delivery remain unverified.
+
 ## Requirements and risk
 
 macOS, installed Google Chrome, Node.js 22.13+ and pnpm 11.19.0. This is an
@@ -160,5 +177,5 @@ and real scheduled sends remain untested. See [the exact scope](../../docs/COMPA
 
 Own plugin/runtime source: [MIT](LICENSE). Publisher metadata: `ckundel2008`.
 Source repository: [ckundel2008/whatsapp-agent-mcp](https://github.com/ckundel2008/whatsapp-agent-mcp),
-with the `v0.3.0` UI candidate prepared locally. Public publication is not complete. OpenWA and other dependencies are not
+with the `v0.3.1` UI candidate prepared locally. Public publication is not complete. OpenWA and other dependencies are not
 relicensed; see [third-party notices](THIRD_PARTY_NOTICES.md).

@@ -97,6 +97,23 @@ test("connection recovery clears its warning without hiding a separate send erro
   assert.equal(c.state.error, "Versandergebnis unklar");
 });
 
+test("read-only status preserves reading but blocks draft, attachment and send actions", async () => {
+  const { controller: c, calls } = setup(async (name) => {
+    if (name === UI_NAMES.messages) return page();
+    if (name === UI_NAMES.status) return { connected: true, state: "CONNECTED", read_only: true };
+    throw new Error(`Unexpected action: ${name}`);
+  });
+  c.select(chat); await tick(); await c.status();
+  c.setDraft("Darf nicht gespeichert werden");
+  assert.equal(c.state.draft, "");
+  assert.equal(await c.setAttachment({ name: "a.txt", type: "text/plain", size: 1, arrayBuffer: async () => new Uint8Array([1]).buffer }), false);
+  await c.prepare();
+  assert.equal(calls.some((value) => [UI_NAMES.prepare, UI_NAMES.attachmentBegin, UI_NAMES.send].includes(value.name)), false);
+  c.update({ prepared: { chat_id: chat.chat_id, text: "gesperrt", approval_id: "approval" } });
+  await c.send();
+  assert.equal(calls.some((value) => value.name === UI_NAMES.send), false);
+});
+
 test("attachment preparation uploads bounded chunks and keeps empty-caption support", async () => {
   const bytes = new Uint8Array(ATTACHMENT_CHUNK_BYTES + 7).fill(65);
   const attachment = { name: "bild.png", type: "image/png", size: bytes.length, arrayBuffer: async () => bytes.buffer };

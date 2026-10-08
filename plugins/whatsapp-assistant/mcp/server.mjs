@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 import { UI_RESOURCE_URI, UI_TOOL_NAMES, dispatchUiTool, uiTools } from "./ui-service.mjs";
 
 const SERVER_NAME = "WhatsApp Assistant";
-const SERVER_VERSION = "0.3.0";
+const SERVER_VERSION = "0.3.1";
 const LATEST_PROTOCOL_VERSION = "2025-11-25";
 const SUPPORTED_PROTOCOL_VERSIONS = new Set([LATEST_PROTOCOL_VERSION, "2025-06-18", "2024-11-05"]);
 const appRoot = process.env.WHATSAPP_ASSISTANT_HOME || path.join(homedir(), "Library", "Application Support", "WhatsApp Assistant");

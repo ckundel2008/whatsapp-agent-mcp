@@ -43,7 +43,7 @@ test("lockfile guard refuses a reintroduced unrepaired upstream snapshot", (t) =
   assert.throws(() => verifyVendoredDependencies(directory), /Unrepaired upstream snapshot/);
 });
 
-test("installer copies both security forks and licenses under paths with spaces, excluding node_modules", (t) => {
+test("installer copies all security forks and licenses under paths with spaces, excluding node_modules", (t) => {
   const { source, target } = fixture(t);
   const dependency = path.join(source, "runtime/vendor/braces/node_modules");
   mkdirSync(dependency);

@@ -8,7 +8,7 @@ const definition = JSON.parse(readFileSync(path.join(root, "release/submission.j
 const cases = Object.fromEntries(Object.entries(definition.test_cases).map(([kind, values]) => [kind, values.map(({ description, prompt, tools_triggered, expected_behavior }) => ({ description, prompt, tools_triggered: tools_triggered.join(", "), expected_behavior }))]));
 const review = { test_cases: cases, commerce: false };
 if (definition.reviewer_access.demo_recording_url) review.demo_recording_url = definition.reviewer_access.demo_recording_url;
-const releaseNotes = "0.3.0 local candidate: bundled German UI, selected chat history, confirmed text/file replies, avatars and explicit incoming-image viewing. Local browser-panel image rendering verified; native Codex rendering, real UI sends and reboot recovery unverified. Public endpoint and reviewer acceptance pending.";
+const releaseNotes = "0.3.1 private UI bridge: the bundled MCP App resource and UI-only actions are available only when allowUi is explicitly enabled; existing configurations remain UI-disabled by default. Text and file confirmations share durable account, recipient, content and file bindings. Native ChatGPT MCP App rendering and connected status were verified on 2026-10-08; native Codex rendering, native UI history/media/send and live media delivery remain unverified.";
 assert.ok(process.argv.length === 2 || (process.argv.length === 3 && process.argv[2] === "--write"), "Use --write to update reviewed metadata, otherwise check only.");
 for (const relative of ["plugins/whatsapp-assistant/plugin.json", "plugins/whatsapp-assistant/.codex-plugin/plugin.json"]) {
   const file = path.join(root, relative);

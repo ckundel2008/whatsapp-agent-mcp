@@ -85,7 +85,7 @@ fi
 /bin/chmod 700 "$RUNTIME_DIR/vendor"
 /usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/vendor/patches.json" "$RUNTIME_DIR/vendor/patches.json"
 /usr/bin/install -m 600 "$PLUGIN_ROOT/runtime/vendor-check.mjs" "$RUNTIME_DIR/vendor-check.mjs"
-for dependency_fork in braces http-cache-semantics; do
+for dependency_fork in braces http-cache-semantics sprintf-js; do
   fork_source="$PLUGIN_ROOT/runtime/vendor/$dependency_fork"
   fork_target="$RUNTIME_DIR/vendor/$dependency_fork"
   if [ ! -f "$fork_source/package.json" ] || [ ! -f "$fork_source/LICENSE" ]; then

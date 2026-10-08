@@ -46,16 +46,17 @@ function accountFingerprint(status) {
  * currently connected local WhatsApp account. The dispatcher is injectable
  * solely to keep this operation testable without touching a real account.
  */
-export async function setupPrivateMcp({ output = DEFAULT_OUTPUT, chatIds = [], allChats = false, allowSending = false, dispatch = callDaemon } = {}) {
+export async function setupPrivateMcp({ output = DEFAULT_OUTPUT, chatIds = [], allChats = false, allowSending = false, allowUi = false, dispatch = callDaemon } = {}) {
   const target = validateOutput(output);
   const allowedChatIds = validateChatIds(chatIds);
   if (typeof allChats !== 'boolean' || typeof allowSending !== 'boolean' || (allChats && allowedChatIds.length) || (allowSending && !allChats && !allowedChatIds.length)) fail('Choose an explicit chat scope before enabling sends.');
   if (typeof dispatch !== 'function') fail('Invalid status dispatcher.');
+  if (typeof allowUi !== 'boolean' || (allowUi && !allChats && !allowedChatIds.length)) fail('UI requires an explicit chat scope.');
 
   // This is the only daemon operation. It does not start, send, list, or read.
   const status = await dispatch('uiStatus', {});
   const expectedAccountFingerprint = accountFingerprint(status);
-  const config = { allowedChatIds, expectedAccountFingerprint, ...(allChats ? { allowAllChats: true } : {}), ...(allowSending ? { allowSending: true } : {}) };
+  const config = { allowedChatIds, expectedAccountFingerprint, ...(allChats ? { allowAllChats: true } : {}), ...(allowSending ? { allowSending: true } : {}), ...(allowUi ? { allowUi: true } : {}) };
 
   // wx/O_EXCL in writeNewPrivateJson makes creation fail safely for existing
   // files and symlinks; read it back through the same private-file checks.
@@ -65,7 +66,7 @@ export async function setupPrivateMcp({ output = DEFAULT_OUTPUT, chatIds = [], a
       !Array.isArray(saved.allowedChatIds) ||
       saved.allowedChatIds.length !== allowedChatIds.length ||
       saved.allowedChatIds.some((id, index) => id !== allowedChatIds[index]) ||
-      (saved.allowAllChats === true) !== allChats || (saved.allowSending === true) !== allowSending) {
+      (saved.allowAllChats === true) !== allChats || (saved.allowSending === true) !== allowSending || (saved.allowUi === true) !== allowUi) {
     fail('Private MCP configuration readback failed.');
   }
   return Object.freeze({ success: true, count: allowedChatIds.length, ...(allChats ? { all_chats: true } : {}), ...(allowSending ? { sends_require_confirmation: true } : {}) });
@@ -74,12 +75,13 @@ export async function setupPrivateMcp({ output = DEFAULT_OUTPUT, chatIds = [], a
 function parseArgs(args) {
   let output = DEFAULT_OUTPUT;
   let outputSeen = false;
-  let allChats = false, allowSending = false;
+  let allChats = false, allowSending = false, allowUi = false;
   const chatIds = [];
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === '--all-chats' && !allChats) { allChats = true; continue; }
     if (arg === '--allow-send' && !allowSending) { allowSending = true; continue; }
+    if (arg === '--allow-ui' && !allowUi) { allowUi = true; continue; }
     if (arg === '--output') {
       if (outputSeen || index + 1 >= args.length) fail('Usage: node private-setup.mjs [--output ABS_PATH] [--chat CHAT_ID ...]');
       outputSeen = true;
@@ -93,7 +95,7 @@ function parseArgs(args) {
     }
     fail('Usage: node private-setup.mjs [--output ABS_PATH] [--chat CHAT_ID ...]');
   }
-  return { output, chatIds, allChats, allowSending };
+  return { output, chatIds, allChats, allowSending, allowUi };
 }
 
 async function main() {

@@ -1,7 +1,7 @@
 # Third-party notices
 
 The repository contains its plugin/runtime source and a pinned dependency
-lockfile and two documented security forks, not node_modules, WhatsApp sessions,
+lockfile and three documented security forks, not node_modules, WhatsApp sessions,
 Chrome binaries or OpenWA source.
 Dependencies are downloaded separately during an explicitly approved install.
 
@@ -9,6 +9,7 @@ Two repaired transitive runtime forks are included as source:
 
 - `braces` 3.0.3 by Jon Schlinkert, MIT. See [license](plugins/whatsapp-assistant/runtime/vendor/braces/LICENSE) and [provenance](plugins/whatsapp-assistant/runtime/vendor/braces/UPSTREAM.md).
 - `http-cache-semantics` 4.2.0 by Kornel Lesinski, BSD-2-Clause. See [license](plugins/whatsapp-assistant/runtime/vendor/http-cache-semantics/LICENSE) and [provenance](plugins/whatsapp-assistant/runtime/vendor/http-cache-semantics/UPSTREAM.md).
+- `sprintf-js` 1.1.3 by Alexandru Marasteanu, BSD-3-Clause. See [license](plugins/whatsapp-assistant/runtime/vendor/sprintf-js/LICENSE) and [provenance](plugins/whatsapp-assistant/runtime/vendor/sprintf-js/UPSTREAM.md).
 
 Their local security corrections retain these licenses; the project's MIT
 license does not replace them. See [maintenance and regression checks](docs/DEPENDENCY_SECURITY_PATCHES.md).

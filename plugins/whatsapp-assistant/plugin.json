@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "whatsapp-assistant",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Local WhatsApp MCP tools and a graphical UI candidate for Codex on macOS: scoped reads and confirmed replies. Native UI support is unverified.",
   "author": {
     "name": "ckundel2008",
@@ -58,7 +58,7 @@
             "description": "Suche gezielt vorhandene WhatsApp-Chats auf deinem Mac, lies einen begrenzten Verlauf und bereite Antworten vor. Versand erfolgt erst nach ausdrücklicher Bestätigung. Jeder Nutzer richtet seine eigene lokale WhatsApp-Verbindung ein. Angeforderte Text-Werkzeugergebnisse gelangen in den Kontext des gewählten KI-Anbieters; Inhalte der Oberfläche werden nur nach ausdrücklicher Auswahl übergeben. Inoffizielle OpenWA-/Chrome-Anbindung. Native MCP-App-Anzeige, echter UI-Versand und Wiederherstellung nach Neustart sind noch nicht abgenommen."
           }
         },
-        "release_notes": "0.3.0 local candidate: bundled German UI, selected chat history, confirmed text/file replies, avatars and explicit incoming-image viewing. Local browser-panel image rendering verified; native Codex rendering, real UI sends and reboot recovery unverified. Public endpoint and reviewer acceptance pending."
+        "release_notes": "0.3.1 private UI bridge: the bundled MCP App resource and UI-only actions are available only when allowUi is explicitly enabled; existing configurations remain UI-disabled by default. Text and file confirmations share durable account, recipient, content and file bindings. Native ChatGPT MCP App rendering and connected status were verified on 2026-10-08; native Codex rendering, native UI history/media/send and live media delivery remain unverified."
       },
       "review": {
         "test_cases": {

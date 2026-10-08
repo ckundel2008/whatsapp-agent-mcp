@@ -1,5 +1,16 @@
 # Runtime dependency security backports
 
+The 0.3.1 candidate additionally pins the published `proxy-addr` 2.0.8 and
+`source-map-js` 1.2.2 fixes. The new `sprintf-js` advisory has no published
+patched npm package at verification time (2026-10-08), so the exact published
+1.1.3 source carries a narrow local numeric-precision mitigation: `%f`/`%e`
+are bounded to 0–100 and `%g` to 1–100 before numeric formatting. String
+precision is unchanged. Compatibility and extreme-input tests run against
+the installed transitive `argparse` dependency; the complete fork inventory,
+license and integrity are verified like the existing forks. This is a local
+mitigation, not an upstream release. See the [source provenance](../plugins/whatsapp-assistant/runtime/vendor/sprintf-js/UPSTREAM.md)
+and [advisory](https://github.com/advisories/GHSA-hp3w-g68c-fv3c).
+
 On 2026-10-03, the production audit reported two high advisories in the
 OpenWA dependency graph. The audit suggested http-cache-semantics 4.2.1 and
 braces 3.0.4, but neither existed in npm; the upstream advisories listed no

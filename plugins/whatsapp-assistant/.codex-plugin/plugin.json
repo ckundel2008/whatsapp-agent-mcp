@@ -1,6 +1,6 @@
 {
   "name": "whatsapp-assistant",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Local WhatsApp MCP tools and graphical UI candidate for Codex on macOS: scoped text reads and confirmed replies. Native UI support is unverified.",
   "author": {
     "name": "ckundel2008",
@@ -99,7 +99,7 @@
         "commerce": false
       },
       "publication": {
-        "release_notes": "0.3.0 local candidate: bundled German UI, selected chat history, confirmed text/file replies, avatars and explicit incoming-image viewing. Local browser-panel image rendering verified; native Codex rendering, real UI sends and reboot recovery unverified. Public endpoint and reviewer acceptance pending."
+        "release_notes": "0.3.1 private UI bridge: the bundled MCP App resource and UI-only actions are available only when allowUi is explicitly enabled; existing configurations remain UI-disabled by default. Text and file confirmations share durable account, recipient, content and file bindings. Native ChatGPT MCP App rendering and connected status were verified on 2026-10-08; native Codex rendering, native UI history/media/send and live media delivery remain unverified."
       }
     }
   }

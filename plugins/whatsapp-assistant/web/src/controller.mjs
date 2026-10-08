@@ -58,6 +58,7 @@ export class WhatsAppController {
         this.chatGeneration++; this.profileCache?.clear(); this.profileQueue?.clear(); this.profilePending?.clear(); if (this.activeMediaId) void this.transport.call(UI_NAMES.mediaRelease, { media_id: this.activeMediaId }).catch(() => {}); if (this.state.media?.blobUrl?.startsWith?.("blob:")) URL.revokeObjectURL(this.state.media.blobUrl); this.activeMediaId = null; this.update({ profiles: {}, media: null, chat: null, messages: [], selected: [] });
       }
       if (status?.account_fingerprint) this.accountFingerprint = status.account_fingerprint;
+      if (status?.read_only === true && this.state.prepared) this.invalidatePrepared();
       this.update({ status, statusError: "" });
     }
     catch (error) { this.update({ status: { connected: false, state: "UNAVAILABLE" }, statusError: errorText(error) }); }
@@ -209,7 +210,7 @@ export class WhatsAppController {
     void this.loadMessages();
   }
   setDraft(draft) {
-    if (!this.state.chat || this.state.sendBusy || this.state.prepareBusy || this.state.fileBusy) return;
+    if (!this.state.chat || this.state.status?.read_only === true || this.state.sendBusy || this.state.prepareBusy || this.state.fileBusy) return;
     this.drafts.set(this.state.chat.chat_id, { text: draft, attachment: this.state.attachment });
     this.invalidatePrepared();
     this.update({ draft, prepared: null, notice: "", sendUnknown: this.uncertain.get(this.state.chat.chat_id) === `${draft}\u0000${this.state.attachment?.sha256 || ""}` });
@@ -225,7 +226,7 @@ export class WhatsAppController {
     return typeof btoa === "function" ? btoa(binary) : Buffer.from(bytes).toString("base64");
   }
   async setAttachment(file) {
-    if (!this.state.chat || this.state.sendBusy || this.state.prepareBusy || this.state.fileBusy) return false;
+    if (!this.state.chat || this.state.status?.read_only === true || this.state.sendBusy || this.state.prepareBusy || this.state.fileBusy) return false;
     if (!file || typeof file.arrayBuffer !== "function") throw new Error("Die Datei konnte nicht gelesen werden.");
     const size = Number(file.size);
     if (!Number.isSafeInteger(size) || size < 1 || size > MAX_ATTACHMENT_BYTES) throw new Error("Anhänge dürfen höchstens 16 MiB groß sein.");
@@ -249,7 +250,7 @@ export class WhatsAppController {
     } finally { if (this.state.fileBusy) this.update({ fileBusy: false }); }
   }
   removeAttachment() {
-    if (!this.state.chat || this.state.sendBusy || this.state.prepareBusy || this.state.fileBusy) return;
+    if (!this.state.chat || this.state.status?.read_only === true || this.state.sendBusy || this.state.prepareBusy || this.state.fileBusy) return;
     this.drafts.set(this.state.chat.chat_id, { text: this.state.draft, attachment: null });
     this.invalidatePrepared();
     this.update({ attachment: null, notice: "", sendUnknown: this.uncertain.get(this.state.chat.chat_id) === `${this.state.draft}\u0000` });
@@ -282,7 +283,7 @@ export class WhatsAppController {
     this.update({ selected: this.state.selected.includes(id) ? this.state.selected.filter((value) => value !== id) : [...this.state.selected, id] });
   }
   async prepare() {
-    if (!this.state.chat || (!this.state.draft.trim() && !this.state.attachment) || this.state.sendBusy || this.state.prepareBusy || this.state.fileBusy || this.state.sendUnknown) return;
+    if (!this.state.chat || this.state.status?.read_only === true || (!this.state.draft.trim() && !this.state.attachment) || this.state.sendBusy || this.state.prepareBusy || this.state.fileBusy || this.state.sendUnknown) return;
     const chatId = this.state.chat.chat_id;
     const draft = this.state.draft;
     const attachment = this.state.attachment;
@@ -315,7 +316,7 @@ export class WhatsAppController {
   async send() {
     this.expire();
     const prepared = this.state.prepared;
-    if (!prepared || this.state.sendBusy || this.state.prepareBusy) return;
+    if (!prepared || this.state.status?.read_only === true || this.state.sendBusy || this.state.prepareBusy) return;
     if (prepared.chat_id !== this.state.chat?.chat_id || prepared.text !== this.state.draft || Boolean(prepared.attachment) !== Boolean(this.state.attachment) || (prepared.attachment && (prepared.attachment.name !== this.state.attachment.name || prepared.attachment.mime !== this.state.attachment.mime || prepared.attachment.size !== this.state.attachment.size || prepared.attachment.sha256 !== this.state.attachment.sha256))) {
       this.update({ prepared: null }); return;
     }
