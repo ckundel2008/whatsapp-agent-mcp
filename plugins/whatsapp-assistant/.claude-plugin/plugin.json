@@ -1,6 +1,6 @@
 {
   "name": "whatsapp-assistant",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Experimental Claude Code packaging for local macOS WhatsApp MCP tools. Codex-focused community release with scoped reads and confirmed replies.",
   "author": { "name": "ckundel2008", "url": "https://github.com/ckundel2008" },
   "homepage": "https://github.com/ckundel2008/whatsapp-agent-mcp",

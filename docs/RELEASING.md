@@ -1,6 +1,6 @@
 # Release and publication process
 
-`v0.3.0` is a local candidate, not a public plugin submission or release. The repository's historical `v0.2.0` source release remains separate. No command in this document publishes source, creates a GitHub release, hosts an endpoint, submits a plugin, links a WhatsApp account, restarts a service, or sends a message.
+`v0.3.1` is a local/private candidate, not a public plugin submission or release. The repository's historical `v0.2.0` source release remains separate. No command in this document publishes source, creates a GitHub release, hosts an endpoint, submits a plugin, links a WhatsApp account, restarts a service, or sends a message.
 
 The current GitHub source-update scope and fresh checks are recorded in
 [GITHUB_UPDATE](GITHUB_UPDATE.md). Source publication is separate from successful

@@ -24,9 +24,13 @@ for (const dependency of ["puppeteer-extra-plugin-devtools", "got", "cacheable-r
   cacheRequire = createRequire(cacheRequire.resolve(dependency));
 }
 const cachePackage = cacheRequire.resolve("http-cache-semantics/package.json");
-for (const [manifestPath, fork, regression] of [
-  [bracesPackage, "braces", "braces-depth.test.cjs"],
-  [cachePackage, "http-cache-semantics", "security.test.cjs"],
+const jsYamlRequire = createRequire(openWaRequire.resolve("js-yaml"));
+const argparseRequire = createRequire(jsYamlRequire.resolve("argparse"));
+const sprintfPackage = argparseRequire.resolve("sprintf-js/package.json");
+for (const [manifestPath, fork, regression, entry] of [
+  [bracesPackage, "braces", "braces-depth.test.cjs", "index.js"],
+  [cachePackage, "http-cache-semantics", "security.test.cjs", "index.js"],
+  [sprintfPackage, "sprintf-js", "security.test.cjs", "src/sprintf.js"],
 ]) {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   assert.equal(manifest.name, `@whatsapp-assistant/${fork}-secure`);
@@ -35,14 +39,14 @@ for (const [manifestPath, fork, regression] of [
   for (const [file, sha256] of Object.entries(dependencyForks[fork].files)) {
     assert.equal(fileDigest(path.join(path.dirname(manifestPath), file)), sha256, `Installed fork differs: ${fork}/${file}`);
   }
-  const installedEntry = path.join(path.dirname(manifestPath), "index.js");
-  const bundledEntry = new URL(`../runtime/vendor/${fork}/index.js`, import.meta.url);
+  const installedEntry = path.join(path.dirname(manifestPath), entry);
+  const bundledEntry = new URL(`../runtime/vendor/${fork}/${entry}`, import.meta.url);
   assert.deepEqual(readFileSync(installedEntry), readFileSync(bundledEntry));
   execFileSync(process.execPath, ["--test", path.join(path.dirname(manifestPath), "test", regression)], {
     stdio: "inherit", timeout: 10_000,
   });
 }
-assert.doesNotMatch(readFileSync(new URL("../runtime/pnpm-lock.yaml", import.meta.url), "utf8"), /^  (?:braces|http-cache-semantics)@\d/m);
+assert.doesNotMatch(readFileSync(new URL("../runtime/pnpm-lock.yaml", import.meta.url), "utf8"), /^  (?:braces|http-cache-semantics|sprintf-js)@\d/m);
 const puppeteerPath = openWaRequire.resolve("puppeteer-core/package.json");
 const puppeteer = require(path.dirname(puppeteerPath));
 const puppeteerRequire = createRequire(puppeteerPath);

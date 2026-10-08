@@ -24,6 +24,13 @@ and send results in the chosen AI client's context and may therefore reach its
 provider. In the loopback browser panel, copying selected text is the explicit
 handoff to the model.
 
+The private Dot profile exposes the MCP App resource and UI-only actions only
+when `allowUi: true` is explicitly configured. Existing profiles default to
+`false`. Each UI session has its own selection, draft and media handles; a
+result from a previous chat, account binding or session is discarded. The
+bound WhatsApp account is checked before and after each action, and UI-only
+metadata is not promoted into model context without an explicit selection.
+
 User-selected outgoing attachments (one file per message, up to 16 MiB) are kept
 in browser memory, then staged in bounded daemon memory for preparation. They are
 not written to plugin files, logs or localStorage. The native host relays the

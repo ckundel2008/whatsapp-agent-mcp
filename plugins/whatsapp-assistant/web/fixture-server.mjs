@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
 import { createUiServer } from "../mcp/ui-http.mjs";
 import { dispatchUiTool } from "../mcp/ui-service.mjs";
+import { createPrivateMcpServer, PRIVATE_UI_RESOURCE_URI } from "../../../online/private-mcp.mjs";
 
 const html = (await readFile(new URL("dist/index.html", import.meta.url), "utf8")).replace("</head>", '<meta name="whatsapp-test-fixture" content="true"></head>');
 const chats = [
@@ -19,7 +20,25 @@ const projectMessages = [
 const mediaBytes = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
 const documentBytes = Buffer.from('<script>window.DOCUMENT_EXECUTED=true</script>');
 const mediaFiles = new Map();
-let calls = []; let shares = []; let downloads = []; const approvals = new Map(); const uploads = new Map();
+let calls = []; let nativeCalls = []; let shares = []; let downloads = []; const approvals = new Map(); const uploads = new Map();
+const privateFingerprint = "a".repeat(64);
+const privateSendKeys = new Set();
+const privateSendLedger = {
+  has: (key) => privateSendKeys.has(key),
+  reserve: (key) => { if (privateSendKeys.has(key)) return false; privateSendKeys.add(key); return true; },
+  release: (key) => privateSendKeys.delete(key),
+};
+const privateDispatch = async (method, args) => {
+  const result = await daemon(method, args);
+  if (method === "uiStatus") return { ...result, account_fingerprint: privateFingerprint, attachment_support: true };
+  if (method === "listChats") return { ...result, chats: result.chats.map(({ chat_id, chat_type, ...chat }) => ({ ...chat, id: chat_id, type: chat_type })) };
+  return result;
+};
+const privateServer = createPrivateMcpServer({
+  config: { allowedChatIds: [], allowAllChats: true, allowSending: true, allowUi: true, expectedAccountFingerprint: privateFingerprint },
+  dispatch: privateDispatch,
+  sendLedger: privateSendLedger,
+});
 async function daemon(method, args) {
   calls.push({ method, args });
   if (method === "status" || method === "uiStatus") return { connected: true, state: "CONNECTED", account: "***0000" };
@@ -80,7 +99,7 @@ async function daemon(method, args) {
     const value = approvals.get(args.approval_id); approvals.delete(args.approval_id);
     if (!value || value.text === "UNBEKANNT") throw new Error("Synthetic unconfirmed delivery.");
     if (value.upload_id) uploads.delete(value.upload_id);
-    return { sent: true, chat_id: value.chat_id, recipient: value.recipient, message_id: "synthetic-sent" };
+    return { sent: true, chat_id: value.chat_id, recipient: value.recipient, message_id: "synthetic-sent", ...(value.attachment ? { attachment: value.attachment } : {}) };
   }
   throw new Error("Unsupported synthetic action");
 }
@@ -103,19 +122,27 @@ const nativeServer = createServer(async (request, response) => {
   response.setHeader("cache-control", "no-store");
   if (request.url === "/") { response.setHeader("content-type", "text/html"); response.end(hostHtml); return; }
   if (request.url === "/native-app") {
-    const hashTags = (tag) => [...html.matchAll(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, "gi"))].map((match) => `'sha256-${createHash("sha256").update(match[1]).digest("base64")}'`).join(" ");
+    const resource = await privateServer.handle({ jsonrpc: "2.0", id: 1, method: "resources/read", params: { uri: PRIVATE_UI_RESOURCE_URI } });
+    const nativeHtml = resource?.result?.contents?.[0]?.text;
+    if (typeof nativeHtml !== "string") { response.writeHead(502); response.end("Private resource unavailable"); return; }
+    const hashTags = (tag) => [...nativeHtml.matchAll(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, "gi"))].map((match) => `'sha256-${createHash("sha256").update(match[1]).digest("base64")}'`).join(" ");
     response.setHeader("content-security-policy", `default-src 'none'; script-src ${hashTags("script")}; style-src ${hashTags("style")}; img-src data:; media-src data:; connect-src 'none'; base-uri 'none'`);
-    response.setHeader("content-type", "text/html"); response.end(html); return;
+    response.setHeader("content-type", "text/html"); response.end(nativeHtml); return;
   }
   let body = "";
   for await (const chunk of request) body += chunk;
   response.setHeader("content-type", "application/json");
-  if (request.url === "/inspect") { response.end(JSON.stringify({ calls, shares, downloads, media_count: mediaFiles.size })); return; }
-  if (request.url === "/reset") { calls = []; shares = []; downloads = []; approvals.clear(); uploads.clear(); mediaFiles.clear(); response.end("{}"); return; }
+  if (request.url === "/inspect") { response.end(JSON.stringify({ calls, nativeCalls, shares, downloads, media_count: mediaFiles.size })); return; }
+  if (request.url === "/reset") { calls = []; nativeCalls = []; shares = []; downloads = []; approvals.clear(); uploads.clear(); mediaFiles.clear(); response.end("{}"); return; }
   if (request.url === "/share") { shares.push(JSON.parse(body)); response.end("{}"); return; }
   if (request.url === "/download") { downloads.push(JSON.parse(body)); response.end("{}"); return; }
   if (request.url === "/native-call") {
-    try { const { name, arguments: args } = JSON.parse(body); response.end(JSON.stringify({ content: [], structuredContent: { ok: true }, _meta: { whatsapp: await dispatchUiTool(name, args, daemon) } })); }
+    try {
+      const { name, arguments: receivedArgs = {} } = JSON.parse(body);
+      nativeCalls.push({ name, args: receivedArgs });
+      const handled = await privateServer.handle({ jsonrpc: "2.0", id: randomUUID(), method: "tools/call", params: { name, arguments: receivedArgs } });
+      response.end(JSON.stringify(handled?.result || handled));
+    }
     catch { response.end(JSON.stringify({ content: [], isError: true, _meta: { whatsapp: { error: "Synthetic failure" } } })); }
     return;
   }

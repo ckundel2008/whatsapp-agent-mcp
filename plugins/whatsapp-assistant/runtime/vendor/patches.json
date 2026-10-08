@@ -24,6 +24,15 @@
         "package.json": "5d6f6981a4327eaaa177ee08787f53814f95b335c777a4615bc0b777b4731800",
         "test/security.test.cjs": "7aefef398f5383db63af2f494a2b4516aab0291bfc2fc1f62436b16eb8a2be3e"
       }
+    },
+    "sprintf-js": {
+      "files": {
+        "LICENSE": "8e7070f3bf8603aff2279ab378fe6b792dc59db0fab8e55cb8e28c9e93ccb0c5",
+        "UPSTREAM.md": "6fdb01a8b4fb3ce2395adb382799094a9387bafb6e3e8197941c937bd1e1f53e",
+        "package.json": "1fa45e1ca692435f260db535f829b0bc1e7e7024da5db2d1b7a9e79b1b3b509a",
+        "src/sprintf.js": "5e32800815fe67da3baee65d48dc691a6ae5ead847b04f0dc658bf9820c0b91c",
+        "test/security.test.cjs": "0215b1ad862a24d6dda27e9473eeaac27a8bf46e91edbcbd58e3a2523ba41586"
+      }
     }
   }
 }

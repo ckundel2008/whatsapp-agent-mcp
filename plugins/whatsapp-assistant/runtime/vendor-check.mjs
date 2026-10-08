@@ -4,7 +4,7 @@ import { lstatSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const expected = { braces: "3.0.3", "http-cache-semantics": "4.2.0" };
+const expected = { braces: "3.0.3", "http-cache-semantics": "4.2.0", "sprintf-js": "1.1.3" };
 export const fileDigest = (file) => createHash("sha256").update(readFileSync(file)).digest("hex");
 
 function regularFiles(directory, relative = "") {
@@ -23,7 +23,7 @@ export function verifyVendoredDependencies(runtime = fileURLToPath(new URL("./",
   assert.deepEqual(Object.keys(inventory.forks).sort(), Object.keys(expected).sort());
   const workspace = readFileSync(path.join(runtime, "pnpm-workspace.yaml"), "utf8");
   const lock = readFileSync(path.join(runtime, "pnpm-lock.yaml"), "utf8");
-  assert.doesNotMatch(lock, /^  (?:braces|http-cache-semantics)@\d/m, "Unrepaired upstream snapshot");
+  assert.doesNotMatch(lock, new RegExp(`^  (?:${Object.keys(expected).join("|")})@\\d`, "m"), "Unrepaired upstream snapshot");
   for (const [fork, originalVersion] of Object.entries(expected)) {
     const directory = path.join(runtime, "vendor", fork);
     const record = inventory.forks[fork];

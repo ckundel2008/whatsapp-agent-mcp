@@ -26,7 +26,7 @@ test("stdio server starts when invoked through a symbolic file path", async () =
       });
       child.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25" } }) + "\n");
     });
-    assert.equal(response.result.serverInfo.version, "0.3.0");
+    assert.equal(response.result.serverInfo.version, "0.3.1");
   } finally { child?.kill(); await rm(temporary, { recursive: true, force: true }); }
 });
 
@@ -155,7 +155,13 @@ test("stdio server completes MCP initialize and tool listing", async () => {
   child.kill("SIGTERM");
   const byId = (id) => responses.find((response) => response.id === id);
   assert.equal(byId(1).result.serverInfo.name, "WhatsApp Assistant");
-  assert.equal(byId(1).result.serverInfo.version, "0.3.0");
+  assert.equal(byId(1).result.serverInfo.version, "0.3.1");
+  const entrypoint = byId(2).result.tools.find((tool) => tool.name === "whatsapp_open_ui");
+  assert.equal(entrypoint.title, "WhatsApp-Chats");
+  assert.equal(entrypoint.icons[0].mimeType, "image/svg+xml");
+  assert.deepEqual(entrypoint.icons[0].sizes, ["20x20"]);
+  assert.match(Buffer.from(entrypoint.icons[0].src.split(',')[1], 'base64').toString(), /stroke="currentColor"/);
+  assert.deepEqual(byId(1).result.serverInfo.icons, entrypoint.icons);
   assert.equal(byId(1).result.capabilities.prompts !== undefined, true);
   assert.equal(byId(2).result.tools.length, 20);
   assert.equal(byId(2).result.tools.find((tool) => tool.name === "whatsapp_open_ui")._meta.ui.resourceUri, "ui://whatsapp-assistant/app.html");
