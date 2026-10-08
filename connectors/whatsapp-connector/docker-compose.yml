@@ -1,0 +1,36 @@
+services:
+  connector:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment: { HOST: 0.0.0.0, PORT: 8787, DATA_DIR: /data, AUTH_STATE_KEY_FILE: /run/secrets/auth_state_key }
+    volumes: [whatsapp_data:/data]
+    secrets: [auth_state_key]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks: [internal]
+  backup:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment: { DATA_DIR: /data, AUTH_STATE_KEY_FILE: /run/secrets/auth_state_key }
+    command: ["sh", "-c", "while true; do npm run backup; sleep 86400; done"]
+    volumes: [whatsapp_data:/data]
+    secrets: [auth_state_key]
+    networks: [internal]
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    depends_on: { connector: { condition: service_healthy } }
+    environment: { WHATSAPP_DOMAIN: "${WHATSAPP_DOMAIN}" }
+    ports: ["80:80", "443:443"]
+    volumes: ["./deploy/Caddyfile:/etc/caddy/Caddyfile:ro", "caddy_data:/data", "caddy_config:/config"]
+    networks: [internal]
+secrets:
+  auth_state_key: { file: ./secrets/auth_state_key }
+volumes: { whatsapp_data: {}, caddy_data: {}, caddy_config: {} }
+networks: { internal: {} }

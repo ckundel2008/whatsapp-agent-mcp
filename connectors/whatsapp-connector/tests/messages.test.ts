@@ -1,0 +1,1 @@
+import{describe,expect,it}from"vitest";import{normalizeMessage}from"../src/messages.js";import{textMessage}from"./helpers.js";describe("normalization",()=>{it("extracts text",()=>expect(normalizeMessage(textMessage("a@s.whatsapp.net","id"," Hallo ",1))).toMatchObject({text:"Hallo",messageKey:"a@s.whatsapp.net:id"}));});

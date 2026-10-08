@@ -1,0 +1,17 @@
+{
+  "name": "whatsapp-connector",
+  "version": "0.2.0",
+  "description": "Private, confirmation-gated WhatsApp text and media access through a self-hosted MCP connector.",
+  "author": { "name": "Christian Kundel" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "WhatsApp Connector",
+    "shortDescription": "Read WhatsApp and send text or media after confirmation",
+    "longDescription": "Connects Codex to a private self-hosted WhatsApp MCP service for scoped chat search, message reading, media retrieval, drafting, and explicit two-step text or media sending.",
+    "developerName": "Christian Kundel",
+    "category": "Communication",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": "Search or summarize only the WhatsApp messages needed for my request. Draft without sending unless I explicitly ask to send, and always show the exact recipient and frozen text or media metadata before the separate confirmed send step."
+  },
+  "mcpServers": "./.mcp.json"
+}

@@ -1,0 +1,15 @@
+node_modules
+**/*.icloud-placeholder
+.DS_Store
+coverage
+node_modules.icloud-placeholder
+dist
+dist.icloud-placeholder
+.git
+.env
+data
+backups
+tmp
+coverage
+secrets
+*.icloud-placeholder

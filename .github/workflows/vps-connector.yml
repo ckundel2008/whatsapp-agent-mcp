@@ -1,0 +1,31 @@
+name: VPS Connector CI
+on:
+  push:
+    paths: ['connectors/whatsapp-connector/**', '.github/workflows/vps-connector.yml']
+  pull_request:
+    paths: ['connectors/whatsapp-connector/**', '.github/workflows/vps-connector.yml']
+permissions:
+  contents: read
+defaults:
+  run:
+    working-directory: connectors/whatsapp-connector
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: connectors/whatsapp-connector/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - run: npm audit --omit=dev
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --tag whatsapp-connector:ci .

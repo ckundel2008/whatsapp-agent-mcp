@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "whatsapp-connector": {
+      "type": "http",
+      "url": "http://127.0.0.1:8787/mcp",
+      "oauth_resource": "http://127.0.0.1:8787"
+    }
+  }
+}
