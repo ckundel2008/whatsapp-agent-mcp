@@ -8,7 +8,7 @@ const status = { connected: true, state: 'CONNECTED', account_fingerprint: confi
 const invoke = (server, name, args = {}) => server.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } });
 test('UI is opt-in, resources are registered and app tools never become model data', async () => {
   const legacy = createPrivateMcpServer({ config: { ...config, allowUi: false }, dispatch: async () => status });
-  assert.equal(legacy.tools.length, 3);
+  assert.equal(legacy.tools.length, 4);
   assert.throws(() => createPrivateMcpServer({ config: { allowedChatIds: [], allowUi: true } }));
   const server = createPrivateMcpServer({ config, dispatch: async () => status });
   assert.ok(server.tools.find(t => t.name === 'whatsapp_open_ui')._meta.ui.resourceUri);

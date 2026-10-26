@@ -1,3 +1,5 @@
+import { groupMembersProjection } from './bob-group-members.mjs';
+import { verifyBobSelfChat } from "./bob-self-chat.mjs";
 import { createHash, randomBytes, randomUUID as nodeRandomUUID } from "node:crypto";
 import { AttachmentStore, MAX_ATTACHMENT_BYTES } from "./attachments.mjs";
 import { HISTORY_WINDOW_MS as MEDIA_HISTORY_WINDOW_MS, MAX_MEDIA_READ_BYTES, MAX_PROFILE_BYTES, MediaReadStore, decodeCanonicalBase64, mediaPlaceholder, openMediaProjection, profilePictureProjection, uiMessagesProjection, validMime, validateOwnerToken } from "./media-reads.mjs";
@@ -211,6 +213,8 @@ export async function sendExistingTextProjection({
   expectedGroup,
   expectedAccountId,
   body,
+  bobGroupOnly = false,
+  replyToMessageId = null,
 }) {
   if (operation !== "sendExistingText") throw new Error("Unsupported fixed browser projection.");
   const root = globalThis.window || globalThis;
@@ -235,6 +239,22 @@ export async function sendExistingTextProjection({
     chat?.isReadOnly === true
   ) return { status: "identity_changed" };
 
+  let bobMetadata;
+  if(bobGroupOnly){
+    if(targetChatId!=='120363000000000000@g.us'||!isGroup)return {status:'identity_changed'};
+    const collection=root.require?.('WAWebGroupMetadataCollection');
+    if(typeof collection?.find!=='function')return {status:'identity_changed'};
+    const cached=collection.get?.(targetChatId);if(cached)cached.stale=true;
+    bobMetadata=await collection.find(targetChatId);
+  }
+  const singletonStillVerified=()=>{
+    if(!bobGroupOnly)return true;
+    const prefs=root.require?.('WAWebUserPrefsMeUser');
+    const own=[prefs?.getMaybeMePnUser?.(),prefs?.getMaybeMeLidUser?.()].map(w=>w?._serialized).filter(Boolean);
+    const ps=bobMetadata?.participants?.getModelsArray?.()||bobMetadata?.participants?._models||bobMetadata?.participants?.models;
+    return bobMetadata?.stale===false&&bobMetadata?.hasIncompleteParticipantInformation!==true&&bobMetadata.size===1&&Array.isArray(ps)&&ps.length===1&&own.includes(ps[0]?.id?._serialized);
+  };
+  if(!singletonStillVerified())return {status:'identity_changed'};
   const modelsOf = () => {
     const values = chat?.msgs?._models || chat?.msgs?.models || [];
     return Array.isArray(values) ? values : Array.from(values || []);
@@ -260,6 +280,21 @@ export async function sendExistingTextProjection({
       return { status: "identity_changed" };
     }
   }
+  let quotedMessage=null;
+  if(replyToMessageId){
+    if(!bobGroupOnly)return {status:'identity_changed'};
+    quotedMessage=modelsOf().find(m=>(m.id?._serialized||String(m.id||''))===replyToMessageId)||store?.Msg?.get?.(replyToMessageId);
+    const own=[userPrefs?.getMaybeMePnUser?.(),userPrefs?.getMaybeMeLidUser?.()].map(w=>w?._serialized).filter(Boolean);
+    const author=quotedMessage?.id?.participant?._serialized||quotedMessage?.author?._serialized||quotedMessage?.from?._serialized;
+    const remote=quotedMessage?.id?.remote?._serialized||quotedMessage?.to?._serialized;
+    if(!quotedMessage||remote!==targetChatId||quotedMessage.id?.fromMe!==true||!own.includes(author)||(!['chat','ptt'].includes(quotedMessage.type)&&quotedMessage.isPtt!==true))return {status:'identity_changed'};
+  }
+  let quotedContext={};
+  if(quotedMessage){
+    if(typeof quotedMessage.msgContextInfo!=='function')return {status:'send_unavailable'};
+    quotedContext=quotedMessage.msgContextInfo(chat);
+    if(!quotedContext||quotedContext.quotedStanzaID!==quotedMessage.id.id)return {status:'identity_changed'};
+  }
   const canBuildMessage = Boolean(
     typeof MsgKey === "function" &&
       (typeof msgKeyModule?.newId === "function" || typeof root.WAPI?.getNewId === "function") &&
@@ -268,6 +303,7 @@ export async function sendExistingTextProjection({
       typeof widFactory?.asUserWidOrThrow === "function" &&
       typeof addAndSend === "function",
   );
+  const describeError=(error,stage)=>({stage,name:error?.name,function_name:String(error?.message||'').match(/([A-Za-z_$][A-Za-z0-9_$.]*) is not a function/)?.[1]||null,property:String(error?.message||'').match(/(?:reading|setting) ['"]([A-Za-z_$][A-Za-z0-9_$]{0,60})['"]/)?.[1]||null,frames:String(error?.stack||'').split('\n').slice(1,9).map(l=>l.match(/at\s+([A-Za-z0-9_$.]+)/)?.[1]).filter(Boolean)});
   const sendTextToChat = canBuildMessage
     ? async (target, text) => {
         const lidUser = userPrefs.getMaybeMeLidUser();
@@ -304,9 +340,14 @@ export async function sendExistingTextProjection({
           isNewMsg: true,
           type: "chat",
           ...ephemeralFields,
+          ...quotedContext,
         };
-        const pendingResult = await addAndSend(target, message);
-        if (Array.isArray(pendingResult)) await Promise.all(pendingResult);
+        if(!singletonStillVerified())return {status:"identity_changed"};
+        let pendingResult;
+        try { pendingResult = await addAndSend(target, message); }
+        catch(error) { return {diagnostic:describeError(error,'native_add')}; }
+        try { if (Array.isArray(pendingResult)) await Promise.all(pendingResult); }
+        catch(error) { return {diagnostic:describeError(error,'native_commit')}; }
         return { id: newId };
       }
     : null;
@@ -330,6 +371,7 @@ export async function sendExistingTextProjection({
     return "";
   };
   const pending = await sendTextToChat(chat, body);
+  if(pending?.diagnostic)return {status:'unconfirmed',diagnostic:pending.diagnostic};
   const expectedMessageId = messageIdOf(pending?.id);
   if (!expectedMessageId) return { status: "unconfirmed" };
 
@@ -341,7 +383,10 @@ export async function sendExistingTextProjection({
       String(message?.type || "chat") === "chat" &&
       String(message?.body ?? message?.content ?? "") === body
     );
-    if (sent) return { status: "sent", message_id: expectedMessageId };
+    if (sent){
+      if(quotedMessage && sent.quotedStanzaID!==quotedMessage.id.id)return {status:'unconfirmed'};
+      return {status:'sent',message_id:expectedMessageId,...(quotedMessage?{reply_to_message_id:replyToMessageId}:{})};
+    }
     if (attempt < 39) await new Promise((resolve) => setTimeout(resolve, 25));
   }
   return { status: "unconfirmed" };
@@ -804,6 +849,117 @@ export function createWhatsAppService({
   }
 
   const handlers = {
+    async verifyBobReplyTarget(params){
+      checkedObject(params,['chat_id','message_id'],'verifyBobReplyTarget');
+      if(params.chat_id!=='120363000000000000@g.us'||typeof params.message_id!=='string'||!params.message_id)throw new Error('BOB_GROUP_OUT_OF_SCOPE');
+      await requireConnected();
+      return client.pup(({chatId,messageId})=>{
+        const root=globalThis.window||globalThis,chat=root.Store?.Chat?.get?.(chatId),prefs=root.require?.('WAWebUserPrefsMeUser');
+        const own=[prefs?.getMaybeMePnUser?.(),prefs?.getMaybeMeLidUser?.()].map(w=>w?._serialized).filter(Boolean),models=chat?.msgs?.getModelsArray?.()||chat?.msgs?._models||chat?.msgs?.models||[];
+        const m=(models.find(m=>(m.id?._serialized||String(m.id||''))===messageId)||root.Store?.Msg?.get?.(messageId)),author=m?.id?.participant?._serialized||m?.author?._serialized||m?.from?._serialized,remote=m?.id?.remote?._serialized||m?.to?._serialized;
+        const verified=chat?.id?._serialized===chatId&&remote===chatId&&m?.id?.fromMe===true&&own.includes(author)&&(['chat','ptt'].includes(m.type)||m.isPtt===true);
+        let quote_context_verified=false;try{const ctx=verified&&typeof m.msgContextInfo==='function'?m.msgContextInfo(chat):null;quote_context_verified=!!ctx&&ctx.quotedStanzaID===m.id.id;}catch{}
+        return {verified,quote_context_verified};
+      },{chatId:params.chat_id,messageId:params.message_id});
+    },
+    async bobAccountStatus(params){
+      checkedObject(params,[],'bobAccountStatus');
+      const status=await handlers.status({}),account=status.connected?await currentAccountId():'';
+      return {connected:status.connected,account_fingerprint:account?createHash('sha256').update(account,'utf8').digest('hex'):null};
+    },
+    async downloadBobVoice(params){
+      checkedObject(params,['chat_id','message_id'],'downloadBobVoice');
+      if(params.chat_id!=='120363000000000000@g.us'||typeof params.message_id!=='string'||!params.message_id)throw new Error('BOB_GROUP_OUT_OF_SCOPE');
+      if((await handlers.verifyBobGroup({chat_id:params.chat_id})).verified!==true)throw new Error('BOB_GROUP_MEMBERSHIP_UNKNOWN');
+      const account=await currentAccountId();
+      const allowed=await client.pup(({chatId,messageId})=>{
+        const root=globalThis.window||globalThis,chat=root.Store?.Chat?.get?.(chatId),prefs=root.require?.('WAWebUserPrefsMeUser');
+        const own=[prefs?.getMaybeMePnUser?.(),prefs?.getMaybeMeLidUser?.()].map(w=>w?._serialized).filter(Boolean);
+        const ms=chat?.msgs?.getModelsArray?.()||chat?.msgs?._models||chat?.msgs?.models||[];
+        const m=(ms.find(m=>(m.id?._serialized||String(m.id||''))===messageId)||root.Store?.Msg?.get?.(messageId)),author=m?.id?.participant?._serialized||m?.author?._serialized||m?.from?._serialized;
+        return chat?.id?._serialized===chatId&&m?.id?.fromMe===true&&own.includes(author)&&(m.type==='ptt'||m.isPtt===true)&&!m.quotedStanzaID&&!m.quotedMsg&&Number(m.duration||0)<=180&&Number(m.size||0)<=900*1024;
+      },{chatId:params.chat_id,messageId:params.message_id});
+      if(!allowed)throw new Error('BOB_VOICE_NOT_VERIFIED');
+      const result=await client.pup(openMediaProjection,{operation:'openMedia',targetChatId:params.chat_id,messageId:params.message_id,expectedAccountId:account,sinceMs:now()-MEDIA_HISTORY_WINDOW_MS});
+      if(result?.status!=='ready'||!/^audio\/(ogg|opus|mpeg|mp4|aac|wav)(;.*)?$/i.test(result.mime||''))throw new Error('BOB_VOICE_UNAVAILABLE');
+      const bytes=decodeCanonicalBase64(result.bytes,900*1024);
+      if(await currentAccountId()!==account||(await handlers.verifyBobGroup({chat_id:params.chat_id})).verified!==true)throw new Error('BOB_GROUP_IDENTITY_CHANGED');
+      return {chat_id:params.chat_id,message_id:params.message_id,mime:result.mime,data_base64:bytes.toString('base64'),byte_length:bytes.length};
+    },
+    async readBobGroupUnreadState(params){
+      checkedObject(params,['chat_id'],'readBobGroupUnreadState');
+      if(params.chat_id!=='120363000000000000@g.us')throw new Error('BOB_GROUP_OUT_OF_SCOPE');
+      if((await handlers.verifyBobGroup(params)).verified!==true)throw new Error('BOB_GROUP_MEMBERSHIP_UNKNOWN');
+      return client.pup(({chatId})=>{
+        const root=globalThis.window||globalThis,chat=root.Store?.Chat?.get?.(chatId);
+        if(chat?.id?._serialized!==chatId)return null;
+        return {chat_id:chatId,unread_count:Number(chat.unreadCount||0),marked_unread:chat.markedUnread===true,unread_attributes:Object.fromEntries(Object.entries(chat.attributes||chat._attributes||{}).filter(([k,v])=>/unread/i.test(k)&&['boolean','number'].includes(typeof v)))};
+      },{chatId:params.chat_id});
+    },
+    async markBobGroupUnread(params){
+      checkedObject(params,['chat_id','message_id'],'markBobGroupUnread');
+      if(params.chat_id!=='120363000000000000@g.us'||typeof params.message_id!=='string'||!params.message_id)throw new Error('BOB_GROUP_OUT_OF_SCOPE');
+      if((await handlers.verifyBobGroup({chat_id:params.chat_id})).verified!==true)throw new Error('BOB_GROUP_MEMBERSHIP_UNKNOWN');
+      const ownMessage=await client.pup(({chatId,messageId})=>{
+        const root=globalThis.window||globalThis,chat=root.Store?.Chat?.get?.(chatId),prefs=root.require?.('WAWebUserPrefsMeUser');
+        const own=[prefs?.getMaybeMePnUser?.(),prefs?.getMaybeMeLidUser?.()].map(w=>w?._serialized).filter(Boolean);
+        const ms=chat?.msgs?.getModelsArray?.()||chat?.msgs?._models||chat?.msgs?.models||[];
+        const m=ms.find(m=>(m.id?._serialized||String(m.id||''))===messageId);
+        const author=m?.id?.participant?._serialized||m?.author?._serialized||m?.from?._serialized;
+        return chat?.id?._serialized===chatId&&m?.id?.fromMe===true&&own.includes(author);
+      },{chatId:params.chat_id,messageId:params.message_id});
+      if(!ownMessage)throw new Error('BOB_GROUP_MESSAGE_NOT_VERIFIED');
+      await client.markAsUnread(params.chat_id);
+      const state=await handlers.readBobGroupUnreadState({chat_id:params.chat_id});
+      const marked=state?.marked_unread===true||state?.unread_count>0||state?.unread_count===-1;
+      return {chat_id:params.chat_id,marked_unread:marked,verified:marked,unread_state:state,checked_at:new Date().toISOString()};
+    },
+    async readBobGroupMessages(params) {
+      checkedObject(params,['chat_id'],'readBobGroupMessages');
+      if(params.chat_id!=='120363000000000000@g.us')throw new Error('BOB_GROUP_OUT_OF_SCOPE');
+      if((await handlers.verifyBobGroup(params)).verified!==true)throw new Error('BOB_GROUP_MEMBERSHIP_UNKNOWN');
+      await resolveChat(params.chat_id);
+      return client.pup(({chatId})=>{
+        const root=globalThis.window||globalThis,prefs=root.require?.('WAWebUserPrefsMeUser');
+        const own=[prefs?.getMaybeMePnUser?.(),prefs?.getMaybeMeLidUser?.()].map(w=>w?._serialized||'').filter(Boolean);
+        const chat=root.Store?.Chat?.get?.(chatId);
+        if(chat?.id?._serialized!==chatId)return null;
+        const local=chat?.msgs?.getModelsArray?.()||chat?.msgs?._models||chat?.msgs?.models||[],global=root.Store?.Msg?.getModelsArray?.()||root.Store?.Msg?._models||root.Store?.Msg?.models||[];
+        const seen=new Set(),ms=[...local,...global].filter(m=>{const remote=m.id?.remote?._serialized||m.to?._serialized,id=m.id?._serialized||String(m.id||'');if(remote!==chatId||!id||seen.has(id))return false;seen.add(id);return true;}).sort((a,b)=>Number(a.t||0)-Number(b.t||0));
+        return {chat:{chat_id:chatId},messages:ms.slice(-200).map(m=>{
+          const id=m.id?._serialized||String(m.id||''),author=m.id?.participant?._serialized||m.author?._serialized||m.from?._serialized||'';
+          const remote=m.id?.remote?._serialized||m.to?._serialized||'';
+          const t=Number(m.t||0)*1000;
+          return {message_id:id,chat_id:chatId,author_id:author,authenticated_author:own.includes(author)&&remote===chatId&&m.id?.fromMe===true,from_me:m.id?.fromMe===true,type:m.isNotification?'excluded':m.type==='ptt'||m.isPtt===true?'ptt':m.isMedia?'excluded':m.type,text:typeof m.body==='string'?m.body:'',quoted:!!(m.quotedMsg||m.quotedStanzaID||m.quotedMsgKey||m.contextInfo?.stanzaId),reply_to_stanza_id:m.quotedStanzaID||null,reply_to_message_id:m.quotedMsg?.id?._serialized||null,duration_seconds:m.type==='ptt'?Number(m.duration||0):null,timestamp:Number.isFinite(t)&&t>0?new Date(t).toISOString():null};
+        })};
+      },{chatId:params.chat_id});
+    },
+    async sendBobGroupPrepared(params) {
+      checkedObject(params,['approval_id','reply_to_message_id'],'sendBobGroupPrepared');
+      const approval=approvals.get(params.approval_id);
+      if(!approval||approval.chatId!=='120363000000000000@g.us'||approval.uploadId)throw new Error('BOB_GROUP_OUT_OF_SCOPE');
+      if((await handlers.verifyBobGroup({chat_id:approval.chatId})).verified!==true)throw new Error('BOB_GROUP_MEMBERSHIP_UNKNOWN');
+      if(params.reply_to_message_id!==undefined&&(typeof params.reply_to_message_id!=='string'||!params.reply_to_message_id))throw new Error('BOB_REPLY_ID_REQUIRED');
+      approval.replyToMessageId=params.reply_to_message_id||null;
+      approval.bobGroupOnly=true;
+      return handlers.sendPrepared({approval_id:params.approval_id});
+    },
+    async verifyBobGroup(params) {
+      checkedObject(params, ['chat_id'], 'verifyBobGroup');
+      if(params.chat_id !== '120363000000000000@g.us') throw new Error('BOB_GROUP_OUT_OF_SCOPE');
+      await requireConnected();
+      const before = await currentAccountId();
+      const members = await client.pup(groupMembersProjection, {chatId:params.chat_id});
+      const own = await client.pup(() => {
+        const root=globalThis.window||globalThis,prefs=root.require?.('WAWebUserPrefsMeUser');
+        return [prefs?.getMaybeMePnUser?.(),prefs?.getMaybeMeLidUser?.()].map(w=>w?._serialized||String(w||'')).filter(Boolean);
+      });
+      if(!before || before !== await currentAccountId() || !Array.isArray(members) || !members.length || !Array.isArray(own) || !own.length) return {verified:false,reason:'membership_unknown'};
+      const ids=members.map(w=>typeof w==='string'?w:w?._serialized).filter(Boolean);
+      return {verified:ids.length===members.length && ids.length===1 && own.includes(ids[0]),member_count:ids.length,only_authenticated_account:ids.length===1&&own.includes(ids[0]),checked_at:new Date().toISOString()};
+    },
+
+    async verifyBobSelfChat(params) { return verifyBobSelfChat(client, params); },
     async checkAttachmentPreparation(params) {
       checkedObject(params, [], "checkAttachmentPreparation");
       await requireConnected();
@@ -1200,7 +1356,10 @@ export function createWhatsAppService({
         expectedGroup: approval.chatType === "group",
         expectedAccountId: approval.accountId,
         body: approval.text,
+        bobGroupOnly: approval.bobGroupOnly === true,
+        replyToMessageId: approval.replyToMessageId || null,
       });
+      if(result?.diagnostic)throw Object.assign(new Error('BOB_SEND_DIAGNOSTIC'),{bobDiagnostic:result.diagnostic});
       if (result?.status === "identity_changed") {
         throw new Error("Chat identity changed or account changed after approval; prepare the message again.");
       }
@@ -1412,7 +1571,7 @@ export function createWhatsAppService({
         logger({ operation: method, duration_ms: Math.max(0, now() - startedAt), success: true });
         return result;
       } catch (error) {
-        logger({ operation: method, duration_ms: Math.max(0, now() - startedAt), success: false, error_code: error?.name || "Error" });
+        logger({ operation: method, duration_ms: Math.max(0, now() - startedAt), success: false, error_code: error?.name || "Error", ...(error?.bobDiagnostic?{send_diagnostic:error.bobDiagnostic}:{}), error_property: String(error?.message||'').match(/(?:reading|setting) ['"]([A-Za-z_$][A-Za-z0-9_$]{0,60})['"]/)?.[1] || null, error_location: String(error?.stack||'').split('\n').slice(1,7).map(line=>line.match(/([A-Za-z0-9_-]+\.(?:js|mjs):\d+:\d+)/)?.[1]).filter(Boolean) });
         throw error;
       }
     },

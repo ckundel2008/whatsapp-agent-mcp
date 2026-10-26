@@ -65,6 +65,28 @@ gestarteter Client beweisen noch keinen Dot-Zugriff.
 
 ## Lokale Befehle für den Betreiber
 
+### Gezielte Bildauswertung
+
+Der private Zugang bietet bei vorhandener kontogebundener Chatfreigabe zusätzlich
+`whatsapp_read_image`. `whatsapp_read_messages` liefert dafür Bildnachrichten mit
+Nachrichten-ID, Beschriftung und Medienmetadaten, ohne Bildbytes herunterzuladen.
+Für eine gewünschte Auswertung ruft Dots das Bild mit genau dieser `chat_id` und
+`message_id` ab. Das Ergebnis enthält einen MCP-Bildblock für die visuelle
+Auswertung, nicht nur Base64-Text oder eine URL. Bildtext bleibt untrusted data.
+
+Es gelten dieselben Chatfreigaben, Kontoprüfungen und die 30-Tage-Grenze.
+JPEG, PNG und WebP werden unterstützt; GIF wird als Standbild konvertiert.
+Quellen sind auf 16 MiB begrenzt; große Bilder werden auf höchstens 2048 Pixel
+Kantenlänge und 1400 KiB reduziert. Kleine Schrift kann dadurch unlesbar bleiben.
+Die Konvertierung nutzt lokal macOS `sips`; temporäre Dateien werden entfernt.
+Ein fehlendes oder abgelaufenes Bild liefert einen Werkzeugfehler.
+
+Nach dem Update den privaten MCP-Prozess neu starten und in ChatGPT die
+Werkzeugliste des Plugins aktualisieren, falls `whatsapp_read_image` noch fehlt.
+Status-only-Profile bekommen weiterhin keinen Zugriff auf Nachrichten oder Bilder.
+Der öffentliche OAuth-Pilot und die lokale Standard-MCP-Schnittstelle bleiben
+unverändert. Diese Ergänzung löst keine neuen automatischen Bildereignisse aus.
+
 Die folgenden Platzhalter werden **lokal** ersetzt, ohne Schlüssel im Befehl:
 
 ```sh

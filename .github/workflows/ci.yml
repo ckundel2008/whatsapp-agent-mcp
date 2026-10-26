@@ -44,6 +44,8 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: node scripts/check-release.mjs
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: plugins/whatsapp-assistant/web
       - run: node --test --test-timeout=30000 plugins/whatsapp-assistant/tests/*.test.mjs
       - run: npm ci --ignore-scripts --no-audit --no-fund
         working-directory: online
