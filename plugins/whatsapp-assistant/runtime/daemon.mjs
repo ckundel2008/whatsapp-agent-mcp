@@ -1,3 +1,6 @@
+import {daemonFailureDecision} from './daemon-failure.mjs';
+import {createHash as qrHash} from 'node:crypto';
+import {installWhatsAppNavigationDeadline} from './bob-browser-startup.mjs';
 import { appendFileSync, chmodSync, existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createConnection, createServer } from "node:net";
 import { homedir } from "node:os";
@@ -19,6 +22,7 @@ const openWaPatchManager = require(path.join(path.dirname(openWaPackagePath), "d
 const puppeteerPackagePath = require.resolve("puppeteer-core/package.json", { paths: [path.dirname(openWaPackagePath)] });
 const puppeteerCore = require(path.dirname(puppeteerPackagePath));
 const setupMode = process.argv.includes("--setup");
+let shuttingDown = false;
 const appRoot = process.env.WHATSAPP_ASSISTANT_HOME || path.join(homedir(), "Library", "Application Support", "WhatsApp Assistant");
 const sessionDir = path.join(appRoot, "session");
 const socketPath = process.env.WHATSAPP_ASSISTANT_SOCKET || path.join(appRoot, "openwa.sock");
@@ -149,9 +153,33 @@ async function main() {
   // them in the WhatsApp page. Supply only the reviewed local compatibility
   // shim required by the pinned 4.76.0 initializer.
   openWaPatchManager.getPatch = async () => ({ data: LOCAL_OPENWA_PATCHES, tag: LOCAL_OPENWA_PATCH_TAG });
+  installWhatsAppNavigationDeadline(puppeteerCore.Page);
   const hardenedChrome = hardenChromeLaunch({ puppeteerCore, openWaPuppeteerConfig });
+  // Stage names and elapsed times only; never log page data or session secrets.
+  for (const [moduleName, stages] of [['browser',['initPage','injectApi']],['auth',['isAuthenticated','waitForRipeSession']],['init_patch',['injectInternalEventHandler','injectInitPatch','injectProgObserver']]]) {
+    const module = require(path.join(path.dirname(openWaPackagePath),'dist','controllers',moduleName+'.js'));
+    for (const stage of stages) {
+      const original=module[stage]; if(typeof original!=='function')continue;
+      module[stage]=async function(...args){const started=Date.now();metadataLogger({operation:'startup_'+stage,phase:'started',success:true});try{if(stage==='initPage'&&args[4]){const spinner=args[4],info=spinner.info.bind(spinner);spinner.info=(text,...more)=>{const name=String(text).startsWith('Launching Browser')?'browser_launch':String(text).startsWith('Browser launched')?'browser_launched':String(text).startsWith('Pre page launch setup complete')?'page_setup_complete':String(text).startsWith('Navigating to WA')?'whatsapp_navigation':null;if(name)metadataLogger({operation:'startup_'+name,success:true});return info(text,...more);};}const result=await original.apply(this,args);metadataLogger({operation:'startup_'+stage,phase:'finished',duration_ms:Date.now()-started,success:true});return result;}catch(error){metadataLogger({operation:'startup_'+stage,phase:'failed',duration_ms:Date.now()-started,success:false,error_code:error?.name||'Error',error_location:String(error?.stack||'').split('\n').slice(1,6).map(line=>line.match(/([A-Za-z_-]+\.(?:js|mjs):\d+:\d+)/)?.[1]).filter(Boolean)});throw error;}};
+    }
+  }
+  if(setupMode){
+    const {ev}=require(path.join(path.dirname(openWaPackagePath),'dist','controllers','events.js'));
+    let latestQrHash=null;
+    ev.on('qrData.whatsapp-assistant',(data)=>{if(typeof data==='string')latestQrHash=qrHash('sha256').update(data).digest('hex');});
+    ev.on('qr.whatsapp-assistant',(png)=>{
+      if(typeof png!=='string'||!png.startsWith('data:image/png;base64,'))return;
+      const bytes=Buffer.from(png.slice('data:image/png;base64,'.length),'base64');
+      if(bytes.length<100||bytes.length>1024*1024)return;
+      const file=path.join(appRoot,'setup-qr.png'),temporary=file+'.tmp';
+      writeFileSync(temporary,bytes,{mode:0o600});renameSync(temporary,file);
+      writeFileSync(path.join(appRoot,'setup-qr-meta.json'),JSON.stringify({payload_hash:latestQrHash,generated_at:Date.now()}),{mode:0o600});
+      metadataLogger({operation:'setup_qr_ready',success:true});
+    });
+  }
   const client = await create({
     sessionId: "whatsapp-assistant",
+    eventMode: false,
     sessionDataPath: sessionDir,
     useChrome: true,
     executablePath: chromePath,
@@ -159,12 +187,13 @@ async function main() {
     chromiumArgs: hardenedChrome.chromiumArgs,
     ignoreDefaultArgs: hardenedChrome.ignoreDefaultArgs,
     headless: true,
+    protocolTimeout: 60000,
     pipe: true,
     multiDevice: true,
     skipUpdateCheck: true,
     skipPatches: false,
     skipBrokenMethodsCheck: true,
-    qrLogSkip: !setupMode,
+    qrLogSkip: true,
     qrTimeout: setupMode ? 0 : 30,
     authTimeout: setupMode ? 0 : 60,
     killProcessOnAuthTimeout: !setupMode,
@@ -180,6 +209,7 @@ async function main() {
   if (setupMode) {
     const state = String(await client.getConnectionState());
     if (state !== "CONNECTED") throw new Error(`WhatsApp setup did not reach CONNECTED (state: ${state}).`);
+    if(existsSync(path.join(appRoot,'setup-qr.png')))rmSync(path.join(appRoot,'setup-qr.png'));
     writeFileSync(setupProofPath, `${Date.now()}\n`, { mode: 0o600, flag: "wx" });
     metadataLogger({ operation: "setup_complete", success: true });
     process.stdout.write("WhatsApp-Anmeldung erfolgreich.\n");
@@ -203,6 +233,7 @@ async function main() {
   metadataLogger({ operation: "socket_ready", success: true });
 
   const shutdown = async (signal) => {
+    shuttingDown = true;
     metadataLogger({ operation: "daemon_stop", success: true });
     await new Promise((resolve) => server.close(resolve));
     if (existsSync(socketPath)) rmSync(socketPath);
@@ -213,15 +244,11 @@ async function main() {
   process.on("SIGINT", () => void shutdown("SIGINT"));
 }
 
-process.on("uncaughtException", (error) => {
-  if (process.env.WHATSAPP_ASSISTANT_DIAGNOSTIC === "1") console.error(error?.stack || error);
-  metadataLogger({ operation: "fatal", success: false, error_code: error?.name || "Error" });
-  process.exit(1);
-});
-process.on("unhandledRejection", (error) => {
-  if (process.env.WHATSAPP_ASSISTANT_DIAGNOSTIC === "1") console.error(error?.stack || error);
-  metadataLogger({ operation: "fatal_rejection", success: false, error_code: error?.name || "Error" });
-  process.exit(1);
-});
-
+function handleFatal(operation,error){
+ const decision=daemonFailureDecision(error,{budgetPath:path.join(appRoot,'restart-budget.json')});
+ metadataLogger({operation,success:false,error_code:decision.errorCode,restart:decision.restart,reason:decision.reason,...(decision.method?{protocol_method:decision.method}:{})});
+ process.exit(setupMode||shuttingDown?0:decision.exitCode);
+}
+process.on("uncaughtException",error=>handleFatal("fatal",error));
+process.on("unhandledRejection",error=>handleFatal("fatal_rejection",error));
 await main();

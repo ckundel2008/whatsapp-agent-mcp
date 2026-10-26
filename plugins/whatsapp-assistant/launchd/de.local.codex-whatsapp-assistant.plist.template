@@ -14,11 +14,11 @@
   <key>RunAtLoad</key>
   <true/>
   <key>KeepAlive</key>
-  <false/>
+  <dict><key>SuccessfulExit</key><false/></dict>
   <key>ProcessType</key>
-  <string>Background</string>
+  <string>Interactive</string>
   <key>ThrottleInterval</key>
-  <integer>300</integer>
+  <integer>60</integer>
   <key>Umask</key>
   <integer>63</integer>
   <key>StandardOutPath</key>

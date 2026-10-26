@@ -1,6 +1,7 @@
+import {installQuotedMessageCompatibility} from './openwa-message-compat.mjs';
 import { resolveAssistantName } from "./display-names.mjs";
 
-export const LOCAL_OPENWA_PATCH_TAG = "local-bootstrap-v2";
+export const LOCAL_OPENWA_PATCH_TAG = "local-bootstrap-v3-quoted-message";
 
 export const LOCAL_OPENWA_PATCHES = Object.freeze([
   `(() => {
@@ -23,6 +24,7 @@ export const LOCAL_OPENWA_PATCHES = Object.freeze([
     };
     window.o = () => "";
     window.WAPI = window.WAPI || {};
+    (${installQuotedMessageCompatibility.toString()})();
     window.WAPI.resolveAssistantName = ${resolveAssistantName.toString()};
     window.WAPI.launchMetrics = () => {
       const chats = window.Store?.Chat;

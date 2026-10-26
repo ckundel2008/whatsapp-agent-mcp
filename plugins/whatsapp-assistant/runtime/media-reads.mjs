@@ -171,6 +171,8 @@ export async function openMediaProjection({ operation, targetChatId, messageId, 
       const message = models.find((candidate) => idOf(candidate) === messageId);
       if (message) return message;
     }
+    const cached=root.Store?.Msg?.get?.(messageId),remote=cached?.id?.remote?._serialized||cached?.to?._serialized||cached?.from?._serialized;
+    if(cached&&idOf(cached)===messageId&&chatsForTarget().some(c=>idOf(c)===remote))return cached;
     return null;
   };
   const normalize = (value) => String(value?._serialized || value || "").split("@", 1)[0].replace(/\D/g, "");
@@ -251,7 +253,7 @@ export async function openMediaProjection({ operation, targetChatId, messageId, 
     const step = 0x8000;
     for (let index = 0; index < array.length; index += step) binary += String.fromCharCode(...array.subarray(index, Math.min(index + step, array.length)));
     const canonical = decodeCanonical(root.btoa?.(binary));
-    const mime = String(raw.mimetype || "").toLowerCase();
+    const mime = String(raw.mimetype || "").split(";",1)[0].trim().toLowerCase();
     if (!canonical || !mimePattern.test(mime)) return { status: "unavailable" };
     if (!unchanged()) return { status: "identity_changed" };
     return { status: "ready", name: String(raw.filename || message.filename || "file").slice(0, 255), mime, bytes: canonical };
